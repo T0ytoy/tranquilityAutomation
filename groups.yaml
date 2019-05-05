@@ -1,0 +1,145 @@
+  default_view:
+    view: true
+    icon: mdi:home
+    entities:
+      - group.all_lights
+      - group.multimedia
+      - group.basic_sensors
+ 
+  multimedia:
+    name: Multimédia
+    view: yes
+    entities:
+      - media_player.lg_oled55b7
+      - media_player.lg_oled55b7v_z
+      - media_player.lg_oled55b7v_z_2
+      - media_player.chrome
+      - media_player.chrome_2
+      - media_player.chrome_3
+
+  automations:
+    name: Automatisations
+    view: yes
+    entities:
+      - group.automations_routines
+      - group.automations_livingroom
+      - group.automations_kitchen
+      - group.automations_bedroom
+      - group.automations_bathroom
+      - group.automations_toilets
+      - group.automations_hall
+
+  sensors:
+    name: Capteurs
+    view: yes
+    entities:
+      - sensor.temperature_livingroom
+      - sensor.humidity_livingroom
+      - sensor.pressure_livingroom
+      - sensor.illumination_gateway
+      - sensor.illumination_hall
+      - sensor.last_boot
+      - sensor.linky
+      - sensor.memory_use_percent
+      - sensor.processor_use
+      - sensor.temperature_cpu      
+      - binary_sensor.motion_sensor_hall
+      - sensor.yr_symbol
+      - sun.sun
+
+  binary_sensors:
+    name: Interrupteurs
+    view: yes
+    entities:
+      - binary_sensor.portable_bedroom
+      - binary_sensor.portable_livingroom
+      - binary_sensor.wall_bedroom
+      - binary_sensor.wall_kitchen_both
+      - binary_sensor.wall_kitchen_left
+      - binary_sensor.wall_kitchen_right
+      - binary_sensor.wall_livingroom_both
+      - binary_sensor.wall_livingroom_left
+      - binary_sensor.wall_livingroom_right
+      - binary_sensor.wall_bathroom
+      - binary_sensor.wall_toilets
+
+  basic_sensors:
+    name: Capteurs
+    view: no
+    entities:
+      - sensor.temperature_livingroom
+      - sensor.humidity_livingroom
+      - sensor.pressure_livingroom
+      - sensor.illumination_gateway
+      - sensor.illumination_hall      
+      - sensor.processor_use
+      - sensor.memory_use_percent
+      - sensor.temperature_cpu
+      - sensor.yr_symbol
+      - sun.sun
+      - sensor.linky
+
+  automations_livingroom:
+    name: Automatisations salon
+    view: no
+    entities:
+      - automation.im_salon_gauche_amp_salon_forte
+      - automation.im_salon_droit_amp_salon_faible
+      - automation.im_salon_cdl_amp_salon_moyenne
+      - automation.im_salon_csim_amp_salon_off
+      - automation.ip_salon_cd_amp_salon_forte
+      - automation.ip_salon_cl_amp_salon_faible
+      - automation.ip_salon_cs_amp_salon_on_off
+
+  automations_kitchen:
+    name: Automatisations cuisine
+    view: no
+    entities:
+      - automation.im_cuisine_droit_amp_cuisine_faible
+      - automation.im_cuisine_gauche_amp_cuisine_fort
+      - automation.im_cuisine_cdl_amp_cuisine_moyenne
+      - automation.im_cuisine_csim_amp_cuisine_off
+
+  automations_bedroom:
+    name: Automatisations chambre
+    view: no
+    entities:
+      - automation.im_chambre_cs_et_amp_chambre_off_chambre_on
+      - automation.im_chambre_cl_et_amp_chambre_off_chambre_on_inverse
+      - automation.im_chambre_cs_et_amp_chambre_on_chambre_off
+      - automation.ip_chambre_cs_et_amp_chambre_off_chambre_on
+      - automation.ip_chambre_cl_et_amp_chambre_off_chambre_on_inverse
+      - automation.ip_chambre_cs_et_amp_chambre_on_chambre_off
+
+  automations_hall:
+    name: Automatisations couloir
+    view: no
+    entities:
+      - automation.detecteur_mouv_couloir_on_amp_couloir_on
+      - automation.detecteur_mouv_couloir_off_amp_couloir_off
+      - automation.im_salon_cddroit_et_couloir_off_amp_couloir_on_et_autom_couloir_on
+      - automation.im_salon_cddroit_et_couloir_on_amp_couloir_off_et_autom_couloir_off
+
+  automations_bathroom:
+    name: Automatisations salle de bain
+    view: no
+    entities:
+      - automation.im_sdb_cs_et_amp_sdb_off_sdb_on
+      - automation.im_sdb_cl_sdb_faible
+      - automation.im_sdb_cd_sdb_max
+      - automation.im_sdb_cs_et_amp_sdb_on_sdb_off
+
+  automations_toilets:
+    name: Automatisations toilettes
+    view: no
+    entities:
+      - automation.im_toilettes_cs_et_amp_toilettes_off_toilettes_on
+      - automation.im_toilettes_cl_toilettes_faible
+      - automation.im_toilettes_cd_toilettes_max
+      - automation.im_toilettes_cs_et_amp_toilettes_on_toilettes_off
+
+  automations_routines:
+    name: Routines
+    view: no
+    entities:
+     -  automation.routine_reveil

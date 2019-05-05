@@ -1,0 +1,80 @@
+turn_on_bedroom:
+  alias: Allumer chambre
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}  
+          80
+        {% else %}
+          150
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          2500
+        {% else %}
+          4000
+        {% endif %}
+turn_on_bedroom_reverse:
+  alias: Allumer chambre (inversé)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}  
+          150
+        {% else %}
+          80
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          4000
+        {% else %}
+          2500
+        {% endif %}
+turn_on_bathroom:
+  alias: Allumer salle de bain
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleSalleDeBain
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 01 %}  
+          80
+        {% elif now().hour >= 01 and now().hour < 09 %}
+          25
+        {% else %}
+          150
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 01 %}
+          3000
+        {% elif now().hour >= 01 and now().hour < 09 %}
+          2500
+        {% else %}
+          4500
+        {% endif %}
+turn_on_toilets:
+  alias: Allumer toilettes
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleToilettes
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 01 %}  
+          80
+        {% elif now().hour >= 01 and now().hour < 09 %}
+          25
+        {% else %}
+          150
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 01 %}
+          3000
+        {% elif now().hour >= 01 and now().hour < 09 %}
+          2500
+        {% else %}
+          4500
+        {% endif %}

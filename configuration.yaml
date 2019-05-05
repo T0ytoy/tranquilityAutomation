@@ -1,0 +1,106 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: 47.2144
+  longitude: -1.5512
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 0
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/Paris
+  # Customization file
+  customize: !include customize.yaml
+
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+# Show the introduction message on startup.
+introduction:
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+http:
+  base_url: http://192.168.0.34:8123
+
+# Discover some devices automatically
+discovery:
+  ignore:
+    - yeelight
+    - apple_tv
+    - belkin_wemo
+    - bluesound
+    - bose_soundtouch
+    - plex_mediaserver
+
+# Text to speech
+tts:
+  - platform: google
+
+script: !include scripts.yaml
+group: !include groups.yaml
+automation: !include automations.yaml
+
+yeelight:
+  devices:
+    192.168.0.21:
+      name: AmpouleCuisine
+    192.168.0.20:
+      name: AmpouleSalon
+    192.168.0.22:
+      name: AmpouleChambre
+    192.168.0.23:
+      name: AmpouleSalleDeBain
+    192.168.0.24:
+      name: AmpouleToilettes
+    192.168.0.25:
+      name: AmpouleCouloir
+
+sensor:
+  - platform: command_line
+    name: Température CPU
+    command: "cat /sys/class/thermal/thermal_zone0/temp"
+    unit_of_measurement: "°C"
+    value_template: '{{ value | multiply(0.001) | round(1) }}'
+  # Weather prediction
+  - platform: yr
+  - platform: systemmonitor
+    resources:
+    - type: disk_use_percent
+      arg: /home
+    - type: memory_use_percent
+    - type: network_in
+      arg: eth0
+    - type: network_out
+      arg: eth0
+    - type: processor_use
+    - type: last_boot
+  - platform: linky
+    username: !secret enedisLogin
+    password: !secret enedisPassword
+
+# You can leave MAC empty if you only have one gateway.
+xiaomi_aqara:
+  discovery_retry: 5
+  gateways:
+    - key: !secret gatewayKey
+
+wake_on_lan:
+
+media_player:
+  - platform: webostv
+    name: LG_OLED55B7
+    host: 192.168.0.26
+    turn_on_action:
+      service: wake_on_lan.send_magic_packet
+      data:
+        mac: "20:3D:BD:01:7B:0A"
+    sources:
+      - youtube
+      - netflix
+  - platform: plex
+  
+notify:
+  - platform: webostv
+    host: 192.168.0.26
+    name: LG_OLED55B7

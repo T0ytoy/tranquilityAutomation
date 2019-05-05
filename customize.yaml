@@ -1,0 +1,3 @@
+group.all_lights:
+  friendly_name: Lumières
+  hidden: false
