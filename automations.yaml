@@ -1,5 +1,5 @@
 #############################################################################
-- id: 'salon1'
+- id: salon1
   alias: IM salon (CDL) -> amp. salon moyenne
   trigger:
     platform: event
@@ -15,7 +15,7 @@
       brightness: 150
       kelvin: 4000
 #############################################################################
-- id: 'salon2'
+- id: salon2
   alias: IM salon (gauche) -> amp. salon forte
   trigger:
     platform: event
@@ -31,7 +31,7 @@
       brightness: 255
       kelvin: 5000
 #############################################################################
-- id: 'salon3'
+- id: salon3
   alias: IM salon (droit) -> amp. salon faible
   trigger:
     platform: event
@@ -47,7 +47,7 @@
       brightness: 100
       kelvin: 3000
 #############################################################################
-- id: 'salon4'
+- id: salon4
   alias: IM salon (CSim) -> amp. salon off
   trigger:
     platform: event
@@ -60,7 +60,7 @@
   - service: light.turn_off
     entity_id: light.AmpouleSalon
 #############################################################################
-- id: 'salon5'
+- id: salon5
   alias: IP salon (CS) -> amp. salon on /off
   trigger:
     platform: event
@@ -73,7 +73,7 @@
   - service: light.toggle
     entity_id: light.AmpouleSalon
 #############################################################################
-- id: 'salon6'
+- id: salon6
   alias: IP salon (CL) -> amp. salon faible
   trigger:
     platform: event
@@ -89,7 +89,7 @@
       brightness: 100
       kelvin: 2500
 #############################################################################
-- id: 'salon7'
+- id: salon7
   alias: IP salon (CD) -> amp. salon forte
   trigger:
     platform: event
@@ -105,7 +105,7 @@
       brightness: 255
       kelvin: 5000
 #############################################################################
-- id: 'cuisine1'
+- id: cuisine1
   alias: IM cuisine (CDL) -> amp. cuisine moyenne
   trigger:
     platform: event
@@ -121,7 +121,7 @@
       brightness: 150
       kelvin: 4000
 #############################################################################
-- id: 'cuisine2'
+- id: cuisine2
   alias: IM cuisine (gauche) -> amp. cuisine fort
   trigger:
     platform: event
@@ -137,7 +137,7 @@
       brightness: 255
       kelvin: 5000
 #############################################################################
-- id: 'cuisine3'
+- id: cuisine3
   alias: IM cuisine (droit) -> amp. cuisine faible
   trigger:
     platform: event
@@ -153,7 +153,7 @@
       brightness: 100
       kelvin: 3000
 #############################################################################
-- id: 'cuisine4'
+- id: cuisine4
   alias: IM cuisine (CSim) -> amp. cuisine off
   trigger:
     platform: event
@@ -166,7 +166,7 @@
   - service: light.turn_off
     entity_id: light.AmpouleCuisine
 #############################################################################
-- id: 'chambre1'
+- id: chambre1
   alias: IM chambre (CS) et amp. chambre off -> Chambre on
   trigger:
     platform: event
@@ -174,15 +174,15 @@
     event_data:
       entity_id: binary_sensor.wall_bedroom
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleChambre
-      state: 'off'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleChambre
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_bedroom
 #############################################################################
-- id: 'chambre2'
+- id: chambre2
   alias: IM chambre (CL) et amp. chambre off -> Chambre on inverse
   trigger:
     platform: event
@@ -190,15 +190,15 @@
     event_data:
       entity_id: binary_sensor.wall_bedroom
       click_type: long
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleChambre
-      state: 'off'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleChambre
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_bedroom_reverse
 #############################################################################
-- id: 'chambre3'
+- id: chambre3
   alias: IM chambre (CS) et amp. chambre on -> Chambre off
   trigger:
     platform: event
@@ -206,31 +206,31 @@
     event_data:
       entity_id: binary_sensor.wall_bedroom
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleChambre
-      state: 'on'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleChambre
+    state: 'on'
   action:
   - service: light.turn_off
     entity_id: light.AmpouleChambre
-# #############################################################################
-- id: 'chambre4'
+#############################################################################
+- id: chambre4
   alias: IP chambre (CS) et amp. chambre off -> Chambre on
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
     event_data:
       entity_id: binary_sensor.portable_bedroom
-      click_type: double
+      click_type: single
   condition:
-    - condition: state
-      entity_id: light.AmpouleChambre
-      state: 'off'
+  - condition: state
+    entity_id: light.AmpouleChambre
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_bedroom
 #############################################################################
-- id: 'chambre5'
+- id: chambre5
   alias: IP chambre (CL) et amp. chambre off -> Chambre on inverse
   trigger:
     platform: event
@@ -243,7 +243,7 @@
     service: script.turn_on
     entity_id: script.turn_on_bedroom_reverse
 #############################################################################
-- id: 'chambre6'
+- id: chambre6
   alias: IP chambre (CS) et amp. chambre on -> Chambre off
   trigger:
     platform: event
@@ -251,15 +251,15 @@
     event_data:
       entity_id: binary_sensor.portable_bedroom
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleChambre
-      state: 'on'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleChambre
+    state: 'on'
   action:
   - service: light.turn_off
     entity_id: light.AmpouleChambre
 #############################################################################
-- id: 'couloir1'
+- id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
   trigger:
     platform: event
@@ -288,7 +288,7 @@
           4500
         {% endif %}
 #############################################################################
-- id: 'couloir2'
+- id: couloir2
   alias: Détecteur mouv. couloir off -> amp. couloir off
   trigger:
     platform: state
@@ -299,7 +299,7 @@
   - service: light.turn_off
     entity_id: light.AmpouleCouloir
 #############################################################################
-- id: 'couloir3'
+- id: couloir3
   alias: IM salon (CDDroit) ET couloir off -> amp. couloir on ET autom. couloir on
   trigger:
     platform: event
@@ -307,7 +307,7 @@
     event_data:
       entity_id: binary_sensor.wall_livingroom_right
       click_type: double
-  condition: 
+  condition:
   - condition: state
     entity_id: light.AmpouleCouloir
     state: 'off'
@@ -317,7 +317,7 @@
   - service: automation.turn_off
     entity_id: automation.detecteur_mouv_couloir_off_ampoule_couloir_off
 #############################################################################
-- id: 'couloir4'
+- id: couloir4
   alias: IM salon (CDDroit) ET couloir on -> amp. couloir off ET autom. couloir off
   trigger:
     platform: event
@@ -325,7 +325,7 @@
     event_data:
       entity_id: binary_sensor.wall_livingroom_right
       click_type: double
-  condition: 
+  condition:
   - condition: state
     entity_id: light.AmpouleCouloir
     state: 'on'
@@ -335,91 +335,91 @@
   - service: automation.turn_on
     entity_id: automation.detecteur_mouv_couloir_off_ampoule_couloir_off
 #############################################################################
-- id: 'routine1'
+- id: routine1
   alias: Routine réveil
   trigger:
     platform: time
-    at: '07:50:00'
+    at: 07:50:00
   condition: []
   action:
-    - service: light.turn_on
-      entity_id: light.AmpouleChambre
-      data:
-        rgb_color: [255, 0, 0]
-        brightness_pct: 1
-    - delay: 00:01:00
-    - service: light.turn_on
-      entity_id: light.AmpouleChambre
-      data:
-        rgb_color: [255,100,0]
-        brightness_pct: 1
-        transition: 420
-    - delay: 00:07:00
-    - service: light.turn_on
-      entity_id: light.AmpouleChambre
-      data:
-        rgb_color: [255,230,200]
-        brightness_pct: 1
-        transition: 240
-    - delay: 00:04:00
-    - service: light.turn_on
-      entity_id: light.AmpouleChambre
-      data:
-        rgb_color: [255,230,200]
-        brightness_pct: 30
-        transition: 180
-    - wait_template: "{{ is_state('binary_sensor.motion_sensor_hall', 'on') }}"
-    - service: light.turn_on
-      entity_id: light.AmpouleToilettes
-      data:
-        brightness: 20
-        kelvin: 3000
-    - delay: 00:00:25
-    - service: light.turn_on
-      entity_id: light.AmpouleSalleDeBain
-      data:
-        brightness: 20
-        kelvin: 3000
-    - delay: 00:01:00
-    - service: light.turn_on
-      entity_id: light.AmpouleSalon
-      data:
-        brightness: 255
-        kelvin: 5000
-    - service: light.turn_on
-      entity_id: light.AmpouleCuisine
-      data:
-        brightness: 255
-        kelvin: 5000
-    - wait_template: "{{ now().hour == 08 and now().minute == 30 }}"
-    - service: light.turn_on
-      entity_id: light.ledGateway
-      data:
-        rgb_color: [255, 127, 0]
-        brightness_pct: 60
-    - delay: 00:01:00
-    - service: light.turn_on
-      entity_id: light.ledGateway
-      data:
-        rgb_color: [255, 84, 0]
-        brightness_pct: 75
-    - delay: 00:01:00
-    - service: light.turn_on
-      entity_id: light.ledGateway
-      data:
-        rgb_color: [255, 42, 0]
-        brightness_pct: 90
-    - delay: 00:01:00
-    - service: light.turn_on
-      entity_id: light.ledGateway
-      data:
-        rgb_color: [255, 0, 0]
-        brightness_pct: 100
-    - delay: 00:06:00
-    - service: light.turn_off
-      entity_id: group.all_lights
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      rgb_color: [255, 0, 0]
+      brightness_pct: 1
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      rgb_color: [255,100,0]
+      brightness_pct: 1
+      transition: 420
+  - delay: 00:07:00
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      rgb_color: [255,230,200]
+      brightness_pct: 1
+      transition: 240
+  - delay: 00:04:00
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      rgb_color: [255,230,200]
+      brightness_pct: 30
+      transition: 180
+  - wait_template: '{{ is_state(''binary_sensor.motion_sensor_hall'', ''on'') }}'
+  - service: light.turn_on
+    entity_id: light.AmpouleToilettes
+    data:
+      brightness: 20
+      kelvin: 3000
+  - delay: 00:00:25
+  - service: light.turn_on
+    entity_id: light.AmpouleSalleDeBain
+    data:
+      brightness: 20
+      kelvin: 3000
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.AmpouleSalon
+    data:
+      brightness: 255
+      kelvin: 5000
+  - service: light.turn_on
+    entity_id: light.AmpouleCuisine
+    data:
+      brightness: 255
+      kelvin: 5000
+  - wait_template: '{{ now().hour == 08 and now().minute == 30 }}'
+  - service: light.turn_on
+    entity_id: light.ledGateway
+    data:
+      rgb_color: [255, 127, 0]
+      brightness_pct: 60
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.ledGateway
+    data:
+      rgb_color: [255, 84, 0]
+      brightness_pct: 75
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.ledGateway
+    data:
+      rgb_color: [255, 42, 0]
+      brightness_pct: 90
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.ledGateway
+    data:
+      rgb_color: [255, 0, 0]
+      brightness_pct: 100
+  - delay: 00:06:00
+  - service: light.turn_off
+    entity_id: group.all_lights
 #############################################################################
-- id: 'bathroom1'
+- id: bathroom1
   alias: IM sdb (CS) et amp. sdb off -> sdb on
   trigger:
     platform: event
@@ -427,15 +427,15 @@
     event_data:
       entity_id: binary_sensor.wall_bathroom
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleSalleDeBain
-      state: 'off'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleSalleDeBain
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_bathroom
 #############################################################################
-- id: 'bathroom2'
+- id: bathroom2
   alias: IM sdb (CL) -> sdb faible
   trigger:
     platform: event
@@ -451,7 +451,7 @@
       brightness: 80
       kelvin: 3000
 #############################################################################
-- id: 'bathroom3'
+- id: bathroom3
   alias: IM sdb (CD) -> sdb max
   trigger:
     platform: event
@@ -467,7 +467,7 @@
       brightness: 255
       kelvin: 4500
 #############################################################################
-- id: 'bathroom4'
+- id: bathroom4
   alias: IM sdb (CS) et amp. sdb on -> sdb off
   trigger:
     platform: event
@@ -475,15 +475,15 @@
     event_data:
       entity_id: binary_sensor.wall_bathroom
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleSalleDeBain
-      state: 'on'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleSalleDeBain
+    state: 'on'
   action:
   - service: light.turn_off
     entity_id: light.AmpouleSalleDeBain
 #############################################################################
-- id: 'toilets1'
+- id: toilets1
   alias: IM toilettes (CS) et amp. toilettes off -> toilettes on
   trigger:
     platform: event
@@ -491,15 +491,15 @@
     event_data:
       entity_id: binary_sensor.wall_toilets
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleToilettes
-      state: 'off'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleToilettes
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_toilets
 #############################################################################
-- id: 'toilets2'
+- id: toilets2
   alias: IM toilettes (CL) -> toilettes faible
   trigger:
     platform: event
@@ -515,7 +515,7 @@
       brightness: 80
       kelvin: 3000
 #############################################################################
-- id: 'toilets3'
+- id: toilets3
   alias: IM toilettes (CD) -> toilettes max
   trigger:
     platform: event
@@ -531,7 +531,7 @@
       brightness: 255
       kelvin: 4500
 #############################################################################
-- id: 'toilets4'
+- id: toilets4
   alias: IM toilettes (CS) et amp. toilettes on -> toilettes off
   trigger:
     platform: event
@@ -539,10 +539,10 @@
     event_data:
       entity_id: binary_sensor.wall_toilets
       click_type: single
-  condition: 
-    - condition: state
-      entity_id: light.AmpouleToilettes
-      state: 'on'
+  condition:
+  - condition: state
+    entity_id: light.AmpouleToilettes
+    state: 'on'
   action:
   - service: light.turn_off
     entity_id: light.AmpouleToilettes

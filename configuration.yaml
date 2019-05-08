@@ -21,7 +21,9 @@ introduction:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 http:
-  base_url: http://192.168.0.34:8123
+  ssl_certificate: /config/dehydrated/certs/tranquility-base.duckdns.org/fullchain.pem
+  ssl_key: /config/dehydrated/certs/tranquility-base.duckdns.org/privkey.pem
+  base_url: hass.tranquility-base.eu
 
 # Discover some devices automatically
 discovery:
@@ -104,3 +106,15 @@ notify:
   - platform: webostv
     host: 192.168.0.26
     name: LG_OLED55B7
+
+google_assistant:
+  project_id: assistantautomationintegration
+  api_key: !secret googleCloudApiKey
+  exposed_domains:
+    - light
+    - media_player
+  entity_config:
+    media_player.lg_oled55b7:
+      expose: true
+    group.all_automations:
+      expose: false
