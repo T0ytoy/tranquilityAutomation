@@ -90,6 +90,7 @@
       - automation.ip_salon_cd_amp_salon_forte
       - automation.ip_salon_cl_amp_salon_faible
       - automation.ip_salon_cs_amp_salon_on_off
+      - automation.tv_eteinte_lumieres_eteintes_gateway_2_min
 
   automations_kitchen:
     name: Automatisations cuisine
@@ -142,4 +143,6 @@
     name: Routines
     view: no
     entities:
-     -  automation.routine_reveil
+     - automation.routine_reveil
+     - input_datetime.morning_routine_date_time
+     - input_datetime.home_departure_time

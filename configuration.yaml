@@ -80,6 +80,25 @@ sensor:
   - platform: linky
     username: !secret enedisLogin
     password: !secret enedisPassword
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'date_time_iso'
+      - 'time_date'
+      - 'time_utc'
+      - 'beat'
+
+input_datetime:
+  morning_routine_date_time:
+    name: Heure du réveil-matin
+    has_date: true
+    has_time: true
+  home_departure_time:
+    name: Heure de départ de la maison
+    has_date: false
+    has_time: true
 
 # You can leave MAC empty if you only have one gateway.
 xiaomi_aqara:
@@ -93,15 +112,13 @@ media_player:
   - platform: webostv
     name: LG_OLED55B7
     host: 192.168.0.26
+    timeout: 2
     turn_on_action:
       service: wake_on_lan.send_magic_packet
       data:
         mac: "20:3D:BD:01:7B:0A"
-    sources:
-      - youtube
-      - netflix
   - platform: plex
-  
+
 notify:
   - platform: webostv
     host: 192.168.0.26
@@ -118,3 +135,15 @@ google_assistant:
       expose: true
     group.all_automations:
       expose: false
+
+
+# ffmpeg:
+  # ffmpeg_bin: /usr/bin/ffmpeg
+
+# stream:
+
+# camera:
+  # - platform: generic
+    # name: testCamera
+    # still_image_url: http://image-in-31.wifeo.com/images/p/pho/photo-montage-regional-L.jpg
+    # stream_source: rtsp://admin:Zmvtmjsun42@192.168.0.16/ucast/11
