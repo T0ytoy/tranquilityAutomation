@@ -237,8 +237,8 @@
     entity_id: light.AmpouleChambre
     state: 'on'
   action:
-  - service: light.turn_off
-    entity_id: light.AmpouleChambre
+    service: script.turn_on
+    entity_id: script.turn_off_bedroom
 #############################################################################
 - id: chambre4
   alias: IP chambre (CS) et amp. chambre off -> Chambre on
@@ -282,8 +282,8 @@
     entity_id: light.AmpouleChambre
     state: 'on'
   action:
-  - service: light.turn_off
-    entity_id: light.AmpouleChambre
+    service: script.turn_on
+    entity_id: script.turn_off_bedroom
 #############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
@@ -326,17 +326,17 @@
     entity_id: light.AmpouleCouloir
 #############################################################################
 - id: couloir3
-  alias: IM salon (CDDroit) ET couloir off -> amp. couloir on ET autom. couloir on
+  alias: IM salon (CDDroit) ET couloir off -> amp. couloir on ET autom. couloir off
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
     event_data:
       entity_id: binary_sensor.wall_livingroom_right
       click_type: double
-  condition:
-  - condition: state
-    entity_id: light.AmpouleCouloir
-    state: 'off'
+  # condition:
+  # - condition: state
+    # entity_id: light.AmpouleCouloir
+    # state: 'off'
   action:
   - service: light.turn_on
     entity_id: light.AmpouleCouloir
@@ -344,7 +344,7 @@
     entity_id: automation.detecteur_mouv_couloir_off_ampoule_couloir_off
 #############################################################################
 - id: couloir4
-  alias: IM salon (CDDroit) ET couloir on -> amp. couloir off ET autom. couloir off
+  alias: IM salon (CDDroit) ET couloir on -> amp. couloir off ET autom. couloir on
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
@@ -397,6 +397,7 @@
       rgb_color: [255,230,200]
       brightness_pct: 30
       transition: 180
+  - delay: 00:00:05
   - wait_template: >
       {{ is_state('binary_sensor.motion_sensor_hall', 'on') }}
   - delay: 00:00:01

@@ -133,6 +133,8 @@ google_assistant:
   entity_config:
     media_player.lg_oled55b7:
       expose: true
+    script.sunset_bedroom:
+      expose: true
     group.all_automations:
       expose: false
 

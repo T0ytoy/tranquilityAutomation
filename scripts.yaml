@@ -16,6 +16,13 @@ turn_on_bedroom:
         {% else %}
           4000
         {% endif %}
+turn_off_bedroom:
+  alias: Eteindre chambre
+  sequence:
+  - service: light.turn_off
+    entity_id: light.AmpouleChambre
+  - service: script.turn_off
+    entity_id: script.sunset_bedroom
 turn_on_bedroom_reverse:
   alias: Allumer chambre (inversé)
   sequence:
@@ -78,3 +85,31 @@ turn_on_toilets:
         {% else %}
           4500
         {% endif %}
+sunset_bedroom:
+  alias: Coucher de soleil chambre
+  sequence:
+  - condition: state
+    entity_id: light.AmpouleChambre
+    state: 'on'
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      kelvin: 2500
+      brightness: 80
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      kelvin: 1
+      brightness: 1
+      transition: 150
+  - delay: 00:02:30
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      rgb_color: [255,0,0]
+      brightness: 1
+      transition: 390
+  - delay: 00:06:30
+  - service: light.turn_off
+    entity_id: light.AmpouleChambre
