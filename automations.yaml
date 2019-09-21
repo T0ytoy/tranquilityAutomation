@@ -108,10 +108,6 @@
 - id: salon8
   alias: TV éteinte & lumières éteintes -> gateway 2 min
   trigger:
-#    platform: state
-#    entity_id: media_player.lg_oled55b7
-#    from: 'playing'
-#    to: 'off'
     platform: template
     value_template: '{{ states.media_player.lg_oled55b7.attributes.entity_picture == null }}'
   condition:
@@ -367,6 +363,9 @@
     platform: time_pattern
     minutes: '/1'
   condition:
+  - condition: state
+    entity_id: group.all_lights
+    state: 'off'
   - condition: template
     value_template: >
       {{ as_timestamp(now()) | timestamp_custom("%d%m%Y%H%M") == states.input_datetime.morning_routine_date_time.attributes.timestamp | timestamp_custom("%d%m%Y%H%M")}}

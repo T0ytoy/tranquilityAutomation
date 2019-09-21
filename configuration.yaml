@@ -37,7 +37,8 @@ discovery:
 
 # Text to speech
 tts:
-  - platform: google
+  - platform: google_translate
+    service_name: google_say
 
 script: !include scripts.yaml
 group: !include groups.yaml
@@ -46,7 +47,7 @@ automation: !include automations.yaml
 yeelight:
   devices:
     192.168.0.21:
-      name: AmpouleCuisine
+      name: AmpouleToilettes
     192.168.0.20:
       name: AmpouleSalon
     192.168.0.22:
@@ -54,7 +55,7 @@ yeelight:
     192.168.0.23:
       name: AmpouleSalleDeBain
     192.168.0.24:
-      name: AmpouleToilettes
+      name: AmpouleCuisine
     192.168.0.25:
       name: AmpouleCouloir
 
@@ -64,6 +65,11 @@ sensor:
     command: "cat /sys/class/thermal/thermal_zone0/temp"
     unit_of_measurement: "°C"
     value_template: '{{ value | multiply(0.001) | round(1) }}'
+  # - platform: command_line
+    # entity_id: isControllerConnected
+    # friendly_name: Mannette connectée
+    # command:  xboxdrv -L | wc -l
+    # value_template: '{{ value | int > 2 }}'
   # Weather prediction
   - platform: yr
   - platform: systemmonitor
@@ -112,7 +118,7 @@ media_player:
   - platform: webostv
     name: LG_OLED55B7
     host: 192.168.0.26
-    timeout: 2
+    timeout: 4
     turn_on_action:
       service: wake_on_lan.send_magic_packet
       data:

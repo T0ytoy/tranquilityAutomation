@@ -118,8 +118,8 @@
     entities:
       - automation.detecteur_mouv_couloir_on_amp_couloir_on
       - automation.detecteur_mouv_couloir_off_amp_couloir_off
-      - automation.im_salon_cddroit_et_couloir_off_amp_couloir_on_et_autom_couloir_on
-      - automation.im_salon_cddroit_et_couloir_on_amp_couloir_off_et_autom_couloir_off
+      - automation.im_salon_cddroit_et_couloir_off_amp_couloir_on_et_autom_couloir_off
+      - automation.im_salon_cddroit_et_couloir_on_amp_couloir_off_et_autom_couloir_on
 
   automations_bathroom:
     name: Automatisations salle de bain
