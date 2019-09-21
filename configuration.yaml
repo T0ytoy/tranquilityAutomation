@@ -35,11 +35,6 @@ discovery:
     - bose_soundtouch
     - plex_mediaserver
 
-# Text to speech
-tts:
-  - platform: google_translate
-    service_name: google_say
-
 script: !include scripts.yaml
 group: !include groups.yaml
 automation: !include automations.yaml

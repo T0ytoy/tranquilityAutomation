@@ -16,15 +16,26 @@ turn_on_bedroom:
         {% else %}
           4000
         {% endif %}
-turn_off_bedroom:
-  alias: Eteindre chambre
+turn_on_bedroom_weak:
+  alias: Allumer chambre (doux)
   sequence:
-  - service: light.turn_off
+  - service: light.turn_on
     entity_id: light.AmpouleChambre
-  - service: script.turn_off
-    entity_id: script.sunset_bedroom
-turn_on_bedroom_reverse:
-  alias: Allumer chambre (inversé)
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}  
+          40
+        {% else %}
+          80
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          2500
+        {% else %}
+          4000
+        {% endif %}
+turn_on_bedroom_strong:
+  alias: Allumer chambre (fort)
   sequence:
   - service: light.turn_on
     entity_id: light.AmpouleChambre
@@ -33,14 +44,22 @@ turn_on_bedroom_reverse:
         {% if now().hour >= 22 or now().hour < 09 %}  
           150
         {% else %}
-          80
+          255
         {% endif %}
       kelvin: >
         {% if now().hour >= 22 or now().hour < 09 %}
           4000
         {% else %}
-          2500
+          5000
         {% endif %}
+turn_off_bedroom:
+  alias: Eteindre chambre
+  sequence:
+  - service: light.turn_off
+    entity_id: light.AmpouleChambre
+  - service: script.turn_off
+    entity_id: script.sunset_bedroom
+
 turn_on_bathroom:
   alias: Allumer salle de bain
   sequence:
@@ -48,43 +67,104 @@ turn_on_bathroom:
     entity_id: light.AmpouleSalleDeBain
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 01 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}  
           80
-        {% elif now().hour >= 01 and now().hour < 09 %}
-          25
         {% else %}
           150
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 01 %}
-          3000
-        {% elif now().hour >= 01 and now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 09 %}
           2500
+        {% else %}
+          4000
+        {% endif %}
+turn_on_bathroom_weak:
+  alias: Allumer salle de bain (doux)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleSalleDeBain
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}  
+          25
+        {% else %}
+          80
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          2500
+        {% else %}
+          4000
+        {% endif %}
+turn_on_bathroom_strong:
+  alias: Allumer salle de bain (fort)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleSalleDeBain
+    data_template:
+      brightness: 255
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3500
         {% else %}
           4500
         {% endif %}
+
 turn_on_toilets:
-  alias: Allumer toilettes
+  alias: Allumer les toilettes
   sequence:
   - service: light.turn_on
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 01 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}  
           80
-        {% elif now().hour >= 01 and now().hour < 09 %}
-          25
         {% else %}
           150
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 01 %}
-          3000
-        {% elif now().hour >= 01 and now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 09 %}
           2500
+        {% else %}
+          4000
+        {% endif %}
+turn_on_toilets_weak:
+  alias: Allumer les toilettes (doux)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleToilettes
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}  
+          25
+        {% else %}
+          80
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          2500
+        {% else %}
+          4000
+        {% endif %}
+turn_on_toilets_strong:
+  alias: Allumer les toilettes (fort)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleToilettes
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}  
+          150
+        {% else %}
+          255
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3500
         {% else %}
           4500
         {% endif %}
+
 sunset_bedroom:
   alias: Coucher de soleil chambre
   sequence:

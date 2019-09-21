@@ -90,7 +90,7 @@
       - automation.ip_salon_cd_amp_salon_forte
       - automation.ip_salon_cl_amp_salon_faible
       - automation.ip_salon_cs_amp_salon_on_off
-      - automation.tv_eteinte_lumieres_eteintes_gateway_2_min
+      - automation.tv_eteinte_lumieres_eteintes_gateway_jusqu_a_allumage_lumiere
 
   automations_kitchen:
     name: Automatisations cuisine
@@ -100,16 +100,20 @@
       - automation.im_cuisine_gauche_amp_cuisine_fort
       - automation.im_cuisine_cdl_amp_cuisine_moyenne
       - automation.im_cuisine_csim_amp_cuisine_off
+      - automation.im_cuisine_cldroit_et_gateway_off_gateway_on
+      - automation.im_cuisine_cldroit_et_gateway_on_gateway_off
 
   automations_bedroom:
     name: Automatisations chambre
     view: no
     entities:
       - automation.im_chambre_cs_et_amp_chambre_off_chambre_on
-      - automation.im_chambre_cl_et_amp_chambre_off_chambre_on_inverse
+      - automation.im_chambre_cl_chambre_on_doux
+      - automation.im_chambre_cd_chambre_on_fort
       - automation.im_chambre_cs_et_amp_chambre_on_chambre_off
       - automation.ip_chambre_cs_et_amp_chambre_off_chambre_on
-      - automation.ip_chambre_cl_et_amp_chambre_off_chambre_on_inverse
+      - automation.ip_chambre_cl_chambre_on_doux
+      - automation.ip_chambre_cd_chambre_on_fort
       - automation.ip_chambre_cs_et_amp_chambre_on_chambre_off
 
   automations_hall:
