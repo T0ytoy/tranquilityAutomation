@@ -17,13 +17,13 @@ homeassistant:
 default_config:
 
 # Show the introduction message on startup.
-introduction:
+#introduction:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 http:
-  ssl_certificate: /config/dehydrated/certs/tranquility-base.duckdns.org/fullchain.pem
-  ssl_key: /config/dehydrated/certs/tranquility-base.duckdns.org/privkey.pem
-  base_url: hass.tranquility-base.eu
+  ssl_certificate: ./ssl/fullchain.pem
+  ssl_key: ./ssl/privkey.pem
+  base_url: tranquility-base.duckdns.org:8123
 
 # Discover some devices automatically
 discovery:
@@ -67,6 +67,10 @@ sensor:
     # value_template: '{{ value | int > 2 }}'
   # Weather prediction
   - platform: yr
+    name: Weather
+    monitored_conditions:
+      - temperature
+      - symbol
   - platform: systemmonitor
     resources:
     - type: disk_use_percent
@@ -78,9 +82,6 @@ sensor:
       arg: eth0
     - type: processor_use
     - type: last_boot
-  - platform: linky
-    username: !secret enedisLogin
-    password: !secret enedisPassword
   - platform: time_date
     display_options:
       - 'time'
@@ -124,6 +125,16 @@ notify:
   - platform: webostv
     host: 192.168.0.26
     name: LG_OLED55B7
+  - platform: html5
+    name: Antoine_notification
+    vapid_pub_key: BBw5KDowbSWcJSLhISTIOxaXnu6SQHeCPaUiRza8fiy9GJeXIhC_kS9HUHIFINsDmH_9Qr79tHuuzku5pOPYBlQ
+    vapid_prv_key: JRtMffWLI9mBlKS-Qr7Sc549fhYwuO2O0xXo63YbBXY
+    vapid_email: jouet.antoine@gmail.com
+  - name: antoine_anh_tv
+    platform: group
+    services:
+      - service: antoine_notification
+      - service: lg_oled55b7
 
 google_assistant:
   project_id: assistantautomationintegration

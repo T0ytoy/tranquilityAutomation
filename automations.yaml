@@ -108,8 +108,9 @@
 - id: salon8
   alias: TV éteinte & lumières éteintes -> gateway jusqu'à allumage lumière
   trigger:
-    platform: template
-    value_template: '{{ states.media_player.lg_oled55b7.attributes.entity_picture == null }}'
+    platform: template 
+    value_template: >
+      {{ states.media_player.lg_oled55b7.attributes.source == null }}
   condition:
   - condition: state
     entity_id: group.all_lights
@@ -119,7 +120,7 @@
     below: 80
   action:
   - service: light.turn_on
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     data:
       rgb_color: [255, 120, 19]
       brightness: 255
@@ -128,9 +129,28 @@
         or is_state('light.AmpouleCuisine', 'on') 
         or is_state('light.AmpouleCouloir', 'on')
       }}
-  - delay: 00:02:00
   - service: light.turn_off
-    entity_id: light.ledGateway 
+    entity_id: light.gateway
+#############################################################################
+- id: salon9
+  alias: Température < 18°C -> notification
+  trigger:
+    platform: time_pattern
+    minutes: '/5'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.temperature_livingroom
+    below: 18
+  - condition: template
+    value_template: >
+      {{ (states.sensor.temperature_livingroom.state | float %0.1 )| round(1) <= 0.1 }}
+  action:
+  - service: notify.antoine_notification
+    data_template:
+      message: "Température salon : {{ states('sensor.temperature_livingroom') }}°C."
+    data:
+      data:
+        tag: temperature-notification
 #############################################################################
 - id: cuisine1
   alias: IM cuisine (CDL) -> amp. cuisine moyenne
@@ -148,7 +168,7 @@
       brightness: 150
       kelvin: 4000
   - service: light.turn_off
-    entity_id: light.ledGateway
+    entity_id: light.gateway
 #############################################################################
 - id: cuisine2
   alias: IM cuisine (gauche) -> amp. cuisine fort
@@ -166,7 +186,7 @@
       brightness: 255
       kelvin: 5000
   - service: light.turn_off
-    entity_id: light.ledGateway
+    entity_id: light.gateway
 #############################################################################
 - id: cuisine3
   alias: IM cuisine (droit) -> amp. cuisine faible
@@ -184,7 +204,7 @@
       brightness: 100
       kelvin: 3000
   - service: light.turn_off
-    entity_id: light.ledGateway
+    entity_id: light.gateway
 #############################################################################
 - id: cuisine4
   alias: IM cuisine (CSim) -> amp. cuisine off
@@ -209,11 +229,11 @@
       click_type: long
   condition:
   - condition: state
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     state: 'off'
   action:
   - service: light.turn_on
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     data:
       rgb_color: [255, 120, 19]
       brightness: 255
@@ -230,11 +250,11 @@
       click_type: long
   condition:
   - condition: state
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     state: 'on'
   action:
   - service: light.turn_off
-    entity_id: light.ledGateway
+    entity_id: light.gateway
 #############################################################################
 - id: chambre1
   alias: IM chambre (CS) et amp. chambre off -> Chambre on
@@ -348,6 +368,33 @@
     service: script.turn_on
     entity_id: script.turn_off_bedroom
 #############################################################################
+- id: chambre9
+  alias: Chauffage chambre on et porte ouverte -> Notification fermeture porte
+  trigger:
+    platform: time_pattern
+    minutes: '/15'
+  condition:
+  # moins de 18°C à l'extérieur
+  - condition: numeric_state
+    entity_id: sensor.weather_temperature
+    below: 18
+  # Apres 23h & avant 1h
+  - condition: template
+    value_template: >      
+      {% set hour = as_timestamp(now()) | timestamp_custom("%H") | float %}
+      {{ hour >= 23 or hour < 1 }}
+  # Porte chambre ouverte
+  - condition: state
+    entity_id: binary_sensor.door_sensor_bedroom
+    state: 'on'
+  action:
+  - service: notify.antoine_anh_tv
+    data_template:
+      message: "Chauffage chambre démarré, fermer la porte !"
+    data:
+      data:
+        tag: warming_bedroom-notification
+#############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
   trigger:
@@ -430,7 +477,8 @@
     state: 'off'
   - condition: template
     value_template: >
-      {{ as_timestamp(now()) | timestamp_custom("%d%m%Y%H%M") == states.input_datetime.morning_routine_date_time.attributes.timestamp | timestamp_custom("%d%m%Y%H%M")}}
+      {% set one_minute_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*60) %} 
+      {{ as_timestamp(now()) | timestamp_custom("%d%m%Y%H%M") == one_minute_before_wake_up | timestamp_custom("%d%m%Y%H%M", false)}}
   action:
   - service: light.turn_on
     entity_id: light.AmpouleChambre
@@ -486,7 +534,7 @@
       kelvin: 5000
 # --------------------------------------
 # calculer l'écart en minutes entre l'heure actuelle et l'heure de départ au travail paramétrée. 
-# Si ce temps est suffisamment faible, on est dans le cas d'un jour de travail et l'on continue sur la routine.
+# Si ce temps est suffisamment faible, on est dans le cas d'un jour de travail et on continue sur la routine.
 # --------------------------------------
   - condition: template
     value_template: >
@@ -499,28 +547,28 @@
 # --------------------------------------
   - wait_template: >
       {% set four_minutes_before_departure_time = states.input_datetime.home_departure_time.attributes.timestamp | int -(4*60) %}
-      {% set time_now = as_timestamp(strptime(states.sensor.date_time.state, '%Y-%m-%d, %H:%M'))| timestamp_custom("%H%M") %}
+      {% set time_now = as_timestamp(strptime(states.sensor.date_time.state, '%Y-%m-%d, %H:%M'))| timestamp_custom("%H%M", false) %}
       {{ time_now  == four_minutes_before_departure_time | timestamp_custom("%H%M", false)}}
   - service: light.turn_on
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     data:
       rgb_color: [255, 127, 0]
       brightness_pct: 60
   - delay: 00:01:00
   - service: light.turn_on
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     data:
       rgb_color: [255, 84, 0]
       brightness_pct: 75
   - delay: 00:01:00
   - service: light.turn_on
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     data:
       rgb_color: [255, 42, 0]
       brightness_pct: 90
   - delay: 00:01:00
   - service: light.turn_on
-    entity_id: light.ledGateway
+    entity_id: light.gateway
     data:
       rgb_color: [255, 0, 0]
       brightness_pct: 100
@@ -554,7 +602,6 @@
       click_type: long
   condition: []
   action:
-  action:
     service: script.turn_on
     entity_id: script.turn_on_bathroom_weak
 #############################################################################
@@ -567,7 +614,6 @@
       entity_id: binary_sensor.wall_bathroom
       click_type: double
   condition: []
-  action:
   action:
     service: script.turn_on
     entity_id: script.turn_on_bathroom_strong
