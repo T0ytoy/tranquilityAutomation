@@ -29,7 +29,7 @@
     entity_id: light.AmpouleSalon
     data:
       brightness: 255
-      kelvin: 5000
+      kelvin: 4500
 #############################################################################
 - id: salon3
   alias: IM salon (droit) -> amp. salon faible
@@ -44,8 +44,8 @@
   - service: light.turn_on
     entity_id: light.AmpouleSalon
     data:
-      brightness: 100
-      kelvin: 3000
+      brightness: 125
+      kelvin: 3300
 #############################################################################
 - id: salon4
   alias: IM salon (CSim) -> amp. salon off
@@ -86,8 +86,8 @@
   - service: light.turn_on
     entity_id: light.AmpouleSalon
     data_template:
-      brightness: 100
-      kelvin: 2500
+      brightness: 125
+      kelvin: 3300
 #############################################################################
 - id: salon7
   alias: IP salon (CD) -> amp. salon forte
@@ -103,7 +103,7 @@
     entity_id: light.AmpouleSalon
     data:
       brightness: 255
-      kelvin: 5000
+      kelvin: 4500
 #############################################################################
 - id: salon8
   alias: TV éteinte & lumières éteintes -> gateway jusqu'à allumage lumière
@@ -117,7 +117,7 @@
     state: 'off'
   - condition: numeric_state
     entity_id: sensor.illumination_gateway
-    below: 80
+    below: 120
   action:
   - service: light.turn_on
     entity_id: light.gateway
@@ -136,7 +136,7 @@
   alias: Température < 18°C -> notification
   trigger:
     platform: time_pattern
-    minutes: '/5'
+    minutes: '/15'
   condition:
   - condition: numeric_state
     entity_id: sensor.temperature_livingroom
@@ -147,6 +147,7 @@
   action:
   - service: notify.antoine_notification
     data_template:
+      title: "Home Assistant"
       message: "Température salon : {{ states('sensor.temperature_livingroom') }}°C."
     data:
       data:
@@ -408,20 +409,28 @@
     entity_id: light.AmpouleCouloir
     data_template:
       brightness: >
-        {% if now().hour >= 22 %}
-          25
-        {% elif now().hour < 9 %}
-          15
-        {% else %}
-          180
+        {% if states.light.ampoulesalon.attributes.brightness > 0 %}
+          {{ states.light.ampoulesalon.attributes.brightness | int }}
+        {% else%}
+          {% if now().hour >= 22 %}
+            25
+          {% elif now().hour < 9 %}
+            15
+          {% else %}
+            180
+          {% endif %}
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 %}
-          3000
-        {% elif now().hour < 9 %}
-          2500
-        {% else %}
-          4500
+        {% if states.light.ampoulesalon.attributes.brightness > 0 %}
+          {{ (1000000/states.light.ampoulesalon.attributes.color_temp) | int}}
+        {% else%}
+          {% if now().hour >= 22 %}
+            3000
+          {% elif now().hour < 9 %}
+            2500
+          {% else %}
+            4500
+          {% endif %}
         {% endif %}
 #############################################################################
 - id: couloir2
