@@ -10,7 +10,7 @@
   condition: []
   action:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
     data:
       brightness: 150
       kelvin: 4000
@@ -26,7 +26,7 @@
   condition: []
   action:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
     data:
       brightness: 255
       kelvin: 4500
@@ -42,9 +42,9 @@
   condition: []
   action:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
     data:
-      brightness: 125
+      brightness: 150
       kelvin: 3300
 #############################################################################
 - id: salon4
@@ -58,7 +58,7 @@
   condition: []
   action:
   - service: light.turn_off
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
 #############################################################################
 - id: salon5
   alias: IP salon (CS) -> amp. salon on /off
@@ -71,7 +71,7 @@
   condition: []
   action:
   - service: light.toggle
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
 #############################################################################
 - id: salon6
   alias: IP salon (CL) -> amp. salon faible
@@ -84,7 +84,7 @@
   condition: []
   action:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
     data_template:
       brightness: 125
       kelvin: 3300
@@ -100,7 +100,7 @@
   condition: []
   action:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.Lumiere_Salon
     data:
       brightness: 255
       kelvin: 4500
@@ -269,6 +269,9 @@
   - condition: state
     entity_id: light.AmpouleChambre
     state: 'off'
+  - condition: state
+    entity_id: light.LampeChevet
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_bedroom
@@ -306,9 +309,14 @@
       entity_id: binary_sensor.wall_bedroom
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.AmpouleChambre
-    state: 'on'
+    condition: or
+    conditions:
+      - condition: state
+        entity_id: light.AmpouleChambre
+        state: 'on'
+      - condition: state
+        entity_id: light.LampeChevet
+        state: 'on'
   action:
     service: script.turn_on
     entity_id: script.turn_off_bedroom
@@ -324,6 +332,9 @@
   condition:
   - condition: state
     entity_id: light.AmpouleChambre
+    state: 'off'
+  - condition: state
+    entity_id: light.LampeChevet
     state: 'off'
   action:
     service: script.turn_on
@@ -362,9 +373,14 @@
       entity_id: binary_sensor.portable_bedroom
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.AmpouleChambre
-    state: 'on'
+    condition: or
+    conditions:
+      - condition: state
+        entity_id: light.AmpouleChambre
+        state: 'on'
+      - condition: state
+        entity_id: light.LampeChevet
+        state: 'on'
   action:
     service: script.turn_on
     entity_id: script.turn_off_bedroom
@@ -409,9 +425,9 @@
     entity_id: light.AmpouleCouloir
     data_template:
       brightness: >
-        {% if states.light.ampoulesalon.attributes.brightness > 0 %}
+        {% if states.light.ampoulesalon.attributes.brightness is defined %}
           {{ states.light.ampoulesalon.attributes.brightness | int }}
-        {% else%}
+        {% else %}
           {% if now().hour >= 22 %}
             25
           {% elif now().hour < 9 %}
@@ -421,9 +437,9 @@
           {% endif %}
         {% endif %}
       kelvin: >
-        {% if states.light.ampoulesalon.attributes.brightness > 0 %}
+        {% if states.light.ampoulesalon.attributes.brightness is defined %}
           {{ (1000000/states.light.ampoulesalon.attributes.color_temp) | int}}
-        {% else%}
+        {% else %}
           {% if now().hour >= 22 %}
             3000
           {% elif now().hour < 9 %}

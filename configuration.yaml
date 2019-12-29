@@ -45,14 +45,25 @@ yeelight:
       name: AmpouleToilettes
     192.168.0.20:
       name: AmpouleSalon
-    192.168.0.22:
+    192.168.0.27:
+      name: AmpouleBureau
+    192.168.0.28:
       name: AmpouleChambre
+    192.168.0.29:
+      name: LampeChevet
     192.168.0.23:
       name: AmpouleSalleDeBain
     192.168.0.24:
       name: AmpouleCuisine
     192.168.0.25:
       name: AmpouleCouloir
+
+light:
+  - platform: group
+    name: Lumière Salon
+    entities:
+      - light.AmpouleSalon
+      - light.AmpouleBureau
 
 sensor:
   - platform: command_line

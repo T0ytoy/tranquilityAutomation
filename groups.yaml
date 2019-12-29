@@ -155,3 +155,7 @@
      - automation.routine_reveil
      - input_datetime.morning_routine_date_time
      - input_datetime.home_departure_time
+     - automation.chauffage_chambre_on_et_porte_ouverte_notification_fermeture_porte
+     - automation.temperature_18degc_notification
+     - automation.tv_eteinte_lumieres_eteintes_gateway_jusqu_a_allumage_lumiere
+     - script.sunset_bedroom

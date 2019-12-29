@@ -5,7 +5,7 @@ turn_on_bedroom:
     entity_id: light.AmpouleChambre
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}
           80
         {% else %}
           150
@@ -19,21 +19,13 @@ turn_on_bedroom:
 turn_on_bedroom_weak:
   alias: Allumer chambre (doux)
   sequence:
-  - service: light.turn_on
+  - service: light.turn_off
     entity_id: light.AmpouleChambre
+  - service: light.turn_on
+    entity_id: light.LampeChevet
     data_template:
-      brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
-          40
-        {% else %}
-          80
-        {% endif %}
-      kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
-          2500
-        {% else %}
-          4000
-        {% endif %}
+      brightness: 50
+      kelvin: 3000
 turn_on_bedroom_strong:
   alias: Allumer chambre (fort)
   sequence:
@@ -41,7 +33,7 @@ turn_on_bedroom_strong:
     entity_id: light.AmpouleChambre
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}
           150
         {% else %}
           255
@@ -57,6 +49,8 @@ turn_off_bedroom:
   sequence:
   - service: light.turn_off
     entity_id: light.AmpouleChambre
+  - service: light.turn_off
+    entity_id: light.LampeChevet
   - service: script.turn_off
     entity_id: script.sunset_bedroom
 
@@ -67,7 +61,7 @@ turn_on_bathroom:
     entity_id: light.AmpouleSalleDeBain
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}
           80
         {% else %}
           150
@@ -85,10 +79,10 @@ turn_on_bathroom_weak:
     entity_id: light.AmpouleSalleDeBain
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
-          25
+        {% if now().hour >= 22 or now().hour < 09 %}
+          10
         {% else %}
-          80
+          40
         {% endif %}
       kelvin: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -117,7 +111,7 @@ turn_on_toilets:
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}
           80
         {% else %}
           150
@@ -135,10 +129,10 @@ turn_on_toilets_weak:
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
-          25
+        {% if now().hour >= 22 or now().hour < 09 %}
+          1
         {% else %}
-          80
+          30
         {% endif %}
       kelvin: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -153,7 +147,7 @@ turn_on_toilets_strong:
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}  
+        {% if now().hour >= 22 or now().hour < 09 %}
           150
         {% else %}
           255
@@ -175,21 +169,28 @@ sunset_bedroom:
     entity_id: light.AmpouleChambre
     data:
       kelvin: 2500
-      brightness: 80
+      brightness: 60
+  - service: light.turn_on
+    entity_id: light.LampeChevet
+    data:
+      kelvin: 2500
+      brightness: 150
   - delay: 00:01:00
   - service: light.turn_on
     entity_id: light.AmpouleChambre
     data:
-      kelvin: 1
+      kelvin: 2500
       brightness: 1
-      transition: 150
-  - delay: 00:02:30
-  - service: light.turn_on
+      transition: 180
+  - delay: 00:03:00
+  - service: light.turn_off
     entity_id: light.AmpouleChambre
+  - service: light.turn_on
+    entity_id: light.LampeChevet
     data:
       rgb_color: [255,0,0]
       brightness: 1
       transition: 390
   - delay: 00:06:30
   - service: light.turn_off
-    entity_id: light.AmpouleChambre
+    entity_id: light.LampeChevet
