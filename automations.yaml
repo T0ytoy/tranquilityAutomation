@@ -412,6 +412,46 @@
       data:
         tag: warming_bedroom-notification
 #############################################################################
+- id: chambre10
+  alias: Limiteur batterie Antoine
+  trigger:
+    platform: template
+    value_template: >
+      {{ states.sensor.battery_level_antoine.state | int >= states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
+  action:
+    service: switch.turn_off
+    entity_id: switch.antoine_phone_smart_plug
+#############################################################################
+- id: chambre11
+  alias: Limiteur batterie Antoine (off->on)
+  trigger:
+    platform: template
+    value_template: >
+      {{ states.sensor.battery_level_antoine.state | int+3 < states.input_number.battery_charging_percentage_limit_antoine.state | int  }}       
+  action:
+    service: switch.turn_on
+    entity_id: switch.antoine_phone_smart_plug
+#############################################################################
+- id: chambre12
+  alias: Limiteur Batterie Anh
+  trigger:
+    platform: template
+    value_template: >
+      {{ states.sensor.battery_level_anh.state | int >= states.input_number.battery_charging_percentage_limit_anh.state | int  }}
+  action:
+    service: switch.turn_off
+    entity_id: switch.anh_phone_smart_plug
+#############################################################################
+- id: chambre13
+  alias: Limiteur batterie Anh (off->on)
+  trigger:
+    platform: template
+    value_template: >
+      {{ states.sensor.battery_level_anh.state | int+3 < states.input_number.battery_charging_percentage_limit_anh.state | int  }}       
+  action:
+    service: switch.turn_on
+    entity_id: switch.anh_phone_smart_plug
+#############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
   trigger:
@@ -425,8 +465,8 @@
     entity_id: light.AmpouleCouloir
     data_template:
       brightness: >
-        {% if states.light.ampoulesalon.attributes.brightness is defined %}
-          {{ states.light.ampoulesalon.attributes.brightness | int }}
+        {% if states.light.lumiere_salon.attributes.brightness is defined %}
+          {{ states.light.lumiere_salon.attributes.brightness | multiply(0.5) | int }}
         {% else %}
           {% if now().hour >= 22 %}
             25
@@ -437,8 +477,8 @@
           {% endif %}
         {% endif %}
       kelvin: >
-        {% if states.light.ampoulesalon.attributes.brightness is defined %}
-          {{ (1000000/states.light.ampoulesalon.attributes.color_temp) | int}}
+        {% if states.light.lumiere_salon.attributes.brightness is defined %}
+          {{ (1000000/states.light.lumiere_salon.attributes.color_temp) | int}}
         {% else %}
           {% if now().hour >= 22 %}
             3000
@@ -714,5 +754,5 @@
     entity_id: light.AmpouleToilettes
     state: 'on'
   action:
-  - service: light.turn_off
+    service: light.turn_off
     entity_id: light.AmpouleToilettes

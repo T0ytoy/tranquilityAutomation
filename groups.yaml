@@ -5,22 +5,21 @@
       - group.all_lights
       - group.multimedia
       - group.basic_sensors
+      - group.switches
  
   multimedia:
     name: Multimédia
     view: yes
     entities:
       - media_player.lg_oled55b7
-      - media_player.lg_oled55b7v_z
-      - media_player.lg_oled55b7v_z_2
-      - media_player.chrome
-      - media_player.chrome_2
-      - media_player.chrome_3
+      - media_player.chambre
 
   automations:
     name: Automatisations
     view: yes
     entities:
+      - group.automations_Antoine
+      - group.automations_Anh
       - group.automations_routines
       - group.automations_livingroom
       - group.automations_kitchen
@@ -83,6 +82,14 @@
       - sensor.temperature_cpu
       - sensor.weather_temperature
       - sun.sun
+
+  switches:
+    name: Prises connectées
+    view: no
+    entities:
+      - switch.antoine_phone_smart_plug
+      - switch.anh_phone_smart_plug
+      - switch.speakers_smart_plug
 
   automations_livingroom:
     name: Automatisations salon
@@ -159,3 +166,20 @@
      - automation.temperature_18degc_notification
      - automation.tv_eteinte_lumieres_eteintes_gateway_jusqu_a_allumage_lumiere
      - script.sunset_bedroom
+
+  automations_antoine:
+    name: Antoine
+    view: no
+    entities:
+     - input_number.battery_charging_percentage_limit_antoine
+     - automation.limiteur_batterie_antoine
+     - sensor.battery_level_antoine
+
+  automations_anh:
+    name: Anh
+    view: no
+    entities:
+     - input_number.battery_charging_percentage_limit_anh
+     - automation.limiteur_batterie_anh
+
+     - sensor.battery_level_anh

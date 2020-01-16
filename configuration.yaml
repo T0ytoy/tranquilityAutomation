@@ -113,6 +113,22 @@ input_datetime:
     has_date: false
     has_time: true
 
+input_number:
+  battery_charging_percentage_limit_antoine:
+    name: Limite charge smartphone Antoine
+    initial: 80
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+  battery_charging_percentage_limit_anh:
+    name: Limite charge smartphone Anh
+    initial: 80
+    min: 0
+    max: 100
+    step: 1
+    mode: box
+
 # You can leave MAC empty if you only have one gateway.
 xiaomi_aqara:
   discovery_retry: 5
@@ -153,6 +169,7 @@ google_assistant:
   exposed_domains:
     - light
     - media_player
+    - switch
   entity_config:
     media_player.lg_oled55b7:
       expose: true
@@ -161,6 +178,13 @@ google_assistant:
     group.all_automations:
       expose: false
 
+
+device_tracker:
+  - platform: nmap_tracker
+    hosts: 192.168.0.1/24
+    home_interval: 15
+    exclude:
+      - 192.168.0.44
 
 # ffmpeg:
   # ffmpeg_bin: /usr/bin/ffmpeg
@@ -172,3 +196,6 @@ google_assistant:
     # name: testCamera
     # still_image_url: http://image-in-31.wifeo.com/images/p/pho/photo-montage-regional-L.jpg
     # stream_source: rtsp://admin:Zmvtmjsun42@192.168.0.16/ucast/11
+
+
+
