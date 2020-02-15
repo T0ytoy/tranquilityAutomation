@@ -12,7 +12,22 @@
     view: yes
     entities:
       - media_player.lg_oled55b7
+      - group.multimedia_bedroom_audio
+
+  camera:
+    name: Caméra
+    view: yes
+    entities:
+      - camera.ffmpeg
+      - binary_sensor.camera_motion
+
+  multimedia_bedroom_audio:
+    name: Audio chambre
+    view: no
+    entities:
       - media_player.chambre
+      - script.speakers_timer_start
+      - input_number.speakers_turnoff_timer
 
   automations:
     name: Automatisations
@@ -173,6 +188,7 @@
     entities:
      - input_number.battery_charging_percentage_limit_antoine
      - automation.limiteur_batterie_antoine
+     - automation.absence_antoine_chargeur_off
      - sensor.battery_level_antoine
 
   automations_anh:
@@ -181,5 +197,5 @@
     entities:
      - input_number.battery_charging_percentage_limit_anh
      - automation.limiteur_batterie_anh
-
+     - automation.absence_anh_chargeur_off
      - sensor.battery_level_anh

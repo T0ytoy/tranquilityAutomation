@@ -4,3 +4,6 @@ group.all_lights:
 
 sensor.weather_temperature:
   friendly_name: Température extérieure
+
+binary_sensor.camera_motion:
+  friendly_name: Mouvement

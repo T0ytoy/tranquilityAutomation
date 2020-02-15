@@ -194,3 +194,19 @@ sunset_bedroom:
   - delay: 00:06:30
   - service: light.turn_off
     entity_id: light.LampeChevet
+
+speakers_timer_start:
+  alias: Extinction haut-parleurs avec délai
+  sequence:
+    - service: automation.turn_on
+      entity_id: automation.chambre16
+    - delay: 04:00:00
+
+record_camera:
+  alias: Enregistrement caméra
+  sequence:
+  - service: camera.record
+    data:
+      entity_id: camera.ffmpeg
+      duration: 60
+      filename: './Recordings/camera_{{ now().strftime("%Y%m%d-%H%M%S") }}.mp4'

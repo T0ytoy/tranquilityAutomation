@@ -12,6 +12,9 @@ homeassistant:
   time_zone: Europe/Paris
   # Customization file
   customize: !include customize.yaml
+  whitelist_external_dirs:
+    - /config/Recordings
+    - /tmp
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
@@ -128,10 +131,18 @@ input_number:
     max: 100
     step: 1
     mode: box
+  speakers_turnoff_timer:
+    name: Délai extinction enceintes
+    unit_of_measurement: "minutes"
+    initial: 45
+    min: 0
+    max: 240
+    step: 5
+    mode: slider
 
 # You can leave MAC empty if you only have one gateway.
 xiaomi_aqara:
-  discovery_retry: 5
+  discovery_retry: 15
   gateways:
     - key: !secret gatewayKey
 
@@ -186,16 +197,20 @@ device_tracker:
     exclude:
       - 192.168.0.44
 
-# ffmpeg:
-  # ffmpeg_bin: /usr/bin/ffmpeg
+ffmpeg:
+  ffmpeg_bin: /usr/bin/ffmpeg
 
-# stream:
+camera:
+  - platform: ffmpeg
+    input: !secret cameraStream
 
-# camera:
-  # - platform: generic
-    # name: testCamera
-    # still_image_url: http://image-in-31.wifeo.com/images/p/pho/photo-montage-regional-L.jpg
-    # stream_source: rtsp://admin:Zmvtmjsun42@192.168.0.16/ucast/11
+stream:
+
+binary_sensor:
+  - platform: ffmpeg_motion
+    name: camera_motion
+    input: !secret cameraStream
+    changes: 8
 
 
 

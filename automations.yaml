@@ -110,7 +110,7 @@
   trigger:
     platform: template 
     value_template: >
-      {{ states.media_player.lg_oled55b7.attributes.source == null }}
+      {{ states.media_player.lg_oled55b7.attributes.entity_picture == null }}
   condition:
   - condition: state
     entity_id: group.all_lights
@@ -417,7 +417,7 @@
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_antoine.state | int >= states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
+      {{ states.sensor.battery_level_antoine.state | int-1 > states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
   action:
     service: switch.turn_off
     entity_id: switch.antoine_phone_smart_plug
@@ -427,7 +427,11 @@
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_antoine.state | int+3 < states.input_number.battery_charging_percentage_limit_antoine.state | int  }}       
+      {{ states.sensor.battery_level_antoine.state | int+1 < states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
+  condition:
+  - condition: state
+    entity_id: device_tracker.smartphone_antoine
+    state: 'home'
   action:
     service: switch.turn_on
     entity_id: switch.antoine_phone_smart_plug
@@ -437,7 +441,7 @@
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_anh.state | int >= states.input_number.battery_charging_percentage_limit_anh.state | int  }}
+      {{ states.sensor.battery_level_anh.state | int-1 > states.input_number.battery_charging_percentage_limit_anh.state | int  }}
   action:
     service: switch.turn_off
     entity_id: switch.anh_phone_smart_plug
@@ -447,10 +451,57 @@
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_anh.state | int+3 < states.input_number.battery_charging_percentage_limit_anh.state | int  }}       
+      {{ states.sensor.battery_level_anh.state | int+1 < states.input_number.battery_charging_percentage_limit_anh.state | int  }}       
+  condition:
+  - condition: state
+    entity_id: device_tracker.smartphone_anh
+    state: 'home'
   action:
     service: switch.turn_on
     entity_id: switch.anh_phone_smart_plug
+#############################################################################
+- id: chambre14
+  alias: Lecture média chromecast audio -> allumage enceintes
+  trigger:
+  - entity_id: media_player.chambre
+    platform: state
+    to: 'playing'
+  action:
+    service: switch.turn_on
+    entity_id: switch.speakers_smart_plug
+#############################################################################
+- id: chambre15
+  alias: Arret lecture média chromecast audio -> extinction enceintes
+  trigger:
+  - entity_id: media_player.chambre
+    platform: state
+    from: 'playing'
+  action:
+  - delay: 00:00:02
+  - service: switch.turn_off
+    entity_id: switch.speakers_smart_plug
+#############################################################################
+- id: chambre16
+  alias: Décompte extinction enceintes chambres
+  trigger:
+    platform: time_pattern
+    minutes: '/1'
+  condition:
+  - condition: state
+    entity_id: script.speakers_timer_start
+    state: 'on'
+  action:
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.speakers_turnoff_timer
+      value: "{{ states.input_number.speakers_turnoff_timer.state | float-1 }}"
+  - condition: numeric_state
+    entity_id: input_number.speakers_turnoff_timer
+    below: 1
+  - service: media_player.turn_off
+    entity_id: media_player.chambre
+  - service: script.turn_off
+    entity_id: script.speakers_timer_start
 #############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
@@ -530,116 +581,6 @@
     entity_id: light.AmpouleCouloir
   - service: automation.turn_on
     entity_id: automation.detecteur_mouv_couloir_off_ampoule_couloir_off
-#############################################################################
-- id: routine1
-  alias: Routine réveil
-  trigger:
-    platform: time_pattern
-    minutes: '/1'
-  condition:
-  - condition: state
-    entity_id: group.all_lights
-    state: 'off'
-  - condition: template
-    value_template: >
-      {% set one_minute_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*60) %} 
-      {{ as_timestamp(now()) | timestamp_custom("%d%m%Y%H%M") == one_minute_before_wake_up | timestamp_custom("%d%m%Y%H%M", false)}}
-  action:
-  - service: light.turn_on
-    entity_id: light.AmpouleChambre
-    data:
-      rgb_color: [255, 0, 0]
-      brightness_pct: 1
-  - delay: 00:01:00
-  - service: light.turn_on
-    entity_id: light.AmpouleChambre
-    data:
-      rgb_color: [255,100,0]
-      brightness_pct: 1
-      transition: 420
-  - delay: 00:07:00
-  - service: light.turn_on
-    entity_id: light.AmpouleChambre
-    data:
-      rgb_color: [255,230,200]
-      brightness_pct: 1
-      transition: 240
-  - delay: 00:04:00
-  - service: light.turn_on
-    entity_id: light.AmpouleChambre
-    data:
-      rgb_color: [255,230,200]
-      brightness_pct: 30
-      transition: 180
-  - delay: 00:00:05
-  - wait_template: >
-      {{ is_state('binary_sensor.motion_sensor_hall', 'on') }}
-  - delay: 00:00:01
-  - service: light.turn_on
-    entity_id: light.AmpouleToilettes
-    data:
-      brightness: 20
-      kelvin: 3000
-  - delay: 00:00:01
-  - service: light.turn_on
-    entity_id: light.AmpouleSalleDeBain
-    data:
-      brightness: 20
-      kelvin: 3000
-  - delay: 00:01:00
-  - service: light.turn_on
-    entity_id: light.AmpouleSalon
-    data:
-      brightness: 255
-      kelvin: 5000
-  - service: light.turn_on
-    entity_id: light.AmpouleCuisine
-    data:
-      brightness: 255
-      kelvin: 5000
-# --------------------------------------
-# calculer l'écart en minutes entre l'heure actuelle et l'heure de départ au travail paramétrée. 
-# Si ce temps est suffisamment faible, on est dans le cas d'un jour de travail et on continue sur la routine.
-# --------------------------------------
-  - condition: template
-    value_template: >
-      {% set departure_time_minutes = (states.input_datetime.home_departure_time.attributes.timestamp | timestamp_custom("%H", false) | int * 60 
-        + states.input_datetime.home_departure_time.attributes.timestamp | timestamp_custom("%M", false) | int ) %}
-      {% set now_minutes = (as_timestamp(now()) | timestamp_custom("%H") | int * 60 + (as_timestamp(now()) | timestamp_custom("%M") | int)) %}
-      {{ departure_time_minutes - now_minutes < 60 and departure_time_minutes - now_minutes > 0 }}
-# --------------------------------------
-# attendre l'heure de départ au travail moins 4 minutes
-# --------------------------------------
-  - wait_template: >
-      {% set four_minutes_before_departure_time = states.input_datetime.home_departure_time.attributes.timestamp | int -(4*60) %}
-      {% set time_now = as_timestamp(strptime(states.sensor.date_time.state, '%Y-%m-%d, %H:%M'))| timestamp_custom("%H%M", false) %}
-      {{ time_now  == four_minutes_before_departure_time | timestamp_custom("%H%M", false)}}
-  - service: light.turn_on
-    entity_id: light.gateway
-    data:
-      rgb_color: [255, 127, 0]
-      brightness_pct: 60
-  - delay: 00:01:00
-  - service: light.turn_on
-    entity_id: light.gateway
-    data:
-      rgb_color: [255, 84, 0]
-      brightness_pct: 75
-  - delay: 00:01:00
-  - service: light.turn_on
-    entity_id: light.gateway
-    data:
-      rgb_color: [255, 42, 0]
-      brightness_pct: 90
-  - delay: 00:01:00
-  - service: light.turn_on
-    entity_id: light.gateway
-    data:
-      rgb_color: [255, 0, 0]
-      brightness_pct: 100
-  - delay: 00:06:00
-  - service: light.turn_off
-    entity_id: group.all_lights
 #############################################################################
 - id: bathroom1
   alias: IM sdb (CS) et amp. sdb off -> sdb on
@@ -756,3 +697,212 @@
   action:
     service: light.turn_off
     entity_id: light.AmpouleToilettes
+#############################################################################
+- id: routine1
+  alias: Routine réveil
+  trigger:
+    platform: time_pattern
+    minutes: '/1'
+  condition:
+  - condition: state
+    entity_id: group.all_lights
+    state: 'off'
+  - condition: template
+    value_template: >
+      {% set one_minute_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*60) %} 
+      {{ as_timestamp(now()) | timestamp_custom("%d%m%Y%H%M") == one_minute_before_wake_up | timestamp_custom("%d%m%Y%H%M", false)}}
+  action:
+  - service: light.turn_on
+    entity_id: light.LampeChevet
+    data:
+      rgb_color: [255, 0, 0]
+      brightness_pct: 1
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.LampeChevet
+    data:
+      rgb_color: [255,100,0]
+      brightness_pct: 25
+      transition: 420
+  - delay: 00:07:00
+  - service: light.turn_on
+    entity_id: light.LampeChevet
+    data:
+      rgb_color: [255,230,200]
+      brightness_pct: 40
+      transition: 240
+  - delay: 00:04:00
+  - service: light.turn_on
+    entity_id: light.AmpouleChambre
+    data:
+      rgb_color: [255,230,200]
+      brightness_pct: 10
+      transition: 180
+  - delay: 00:00:05
+  - wait_template: >
+      {{ is_state('binary_sensor.motion_sensor_hall', 'on') }}
+  - delay: 00:00:01
+  - service: light.turn_on
+    entity_id: light.AmpouleToilettes
+    data:
+      brightness: 20
+      kelvin: 3000
+  - delay: 00:00:01
+  - service: light.turn_on
+    entity_id: light.AmpouleSalleDeBain
+    data:
+      brightness: 20
+      kelvin: 3000
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.AmpouleSalon
+    data:
+      brightness: 255
+      kelvin: 5000
+  - service: light.turn_on
+    entity_id: light.AmpouleCuisine
+    data:
+      brightness: 255
+      kelvin: 5000
+# --------------------------------------
+# calculer l'écart en minutes entre l'heure actuelle et l'heure de départ au travail paramétrée. 
+# Si ce temps est suffisamment faible, on est dans le cas d'un jour de travail et on continue sur la routine.
+# --------------------------------------
+  - condition: template
+    value_template: >
+      {% set departure_time_minutes = (states.input_datetime.home_departure_time.attributes.timestamp | timestamp_custom("%H", false) | int * 60 
+        + states.input_datetime.home_departure_time.attributes.timestamp | timestamp_custom("%M", false) | int ) %}
+      {% set now_minutes = (as_timestamp(now()) | timestamp_custom("%H") | int * 60 + (as_timestamp(now()) | timestamp_custom("%M") | int)) %}
+      {{ departure_time_minutes - now_minutes < 60 and departure_time_minutes - now_minutes > 0 }}
+# --------------------------------------
+# attendre l'heure de départ au travail moins 4 minutes
+# --------------------------------------
+  - wait_template: >
+      {% set four_minutes_before_departure_time = states.input_datetime.home_departure_time.attributes.timestamp | int -(4*60) %}
+      {% set time_now = as_timestamp(strptime(states.sensor.date_time.state, '%Y-%m-%d, %H:%M'))| timestamp_custom("%H%M", false) %}
+      {{ time_now  == four_minutes_before_departure_time | timestamp_custom("%H%M", false)}}
+  - service: light.turn_on
+    entity_id: light.gateway
+    data:
+      rgb_color: [255, 127, 0]
+      brightness_pct: 60
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.gateway
+    data:
+      rgb_color: [255, 84, 0]
+      brightness_pct: 75
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.gateway
+    data:
+      rgb_color: [255, 42, 0]
+      brightness_pct: 90
+  - delay: 00:01:00
+  - service: light.turn_on
+    entity_id: light.gateway
+    data:
+      rgb_color: [255, 0, 0]
+      brightness_pct: 100
+  - delay: 00:06:00
+  - service: light.turn_off
+    entity_id: group.all_lights
+#############################################################################
+- id: 'routine2'
+  alias: Absence Antoine -> chargeur off
+  trigger:
+  - entity_id: device_tracker.smartphone_antoine
+    platform: state
+    from: 'home'
+    to: 'not_home'
+    for: 00:10:00
+  condition: []
+  action:
+    service: switch.turn_off
+    entity_id: switch.antoine_phone_smart_plug
+#############################################################################
+- id: 'routine3'
+  alias: Absence Anh -> chargeur off
+  trigger:
+  - entity_id: device_tracker.smartphone_anh
+    platform: state
+    from: 'home'
+    to: 'not_home'
+    for: 00:10:00
+  condition: []
+  action:
+    service: switch.turn_off
+    entity_id: switch.anh_phone_smart_plug
+#############################################################################
+- id: 'routine4'
+  alias: Retour Antoine -> chargeur on
+  trigger:
+  - entity_id: device_tracker.smartphone_antoine
+    platform: state
+    from: 'not_home'
+    to: 'home'
+  condition:
+    condition: template
+    value_template: >
+      {{ states.sensor.battery_level_antoine.state | int+1 < states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
+  action:
+    service: switch.turn_on
+    entity_id: switch.antoine_phone_smart_plug
+#############################################################################
+- id: 'routine5'
+  alias: Retour Anh -> chargeur on
+  trigger:
+  - entity_id: device_tracker.smartphone_anh
+    platform: state
+    from: 'not_home'
+    to: 'home'
+  condition:
+    condition: template
+    value_template: >
+      {{ states.sensor.battery_level_anh.state | int+1 < states.input_number.battery_charging_percentage_limit_anh.state | int  }}
+  action:
+    service: switch.turn_on
+    entity_id: switch.anh_phone_smart_plug
+#############################################################################
+- id: 'camera1'
+  alias: Absence + mouvement -> enregistrement caméra
+  trigger:
+  - entity_id: binary_sensor.camera_motion
+    platform: state
+    from: 'off'
+    to: 'on'
+  condition:
+  - condition: state
+    entity_id: group.all_devices
+    state: 'not_home'
+  action:
+  - service: script.turn_on
+    entity_id: script.record_camera
+  - service: notify.antoine_notification
+    data_template:
+      title: "Home Assistant"
+      message: "Mouvement détecté : caméra déclenchée"
+#############################################################################
+- id: 'camera2'
+  alias: Départ appartement -> détecteur mouv. caméra on
+  trigger:
+  - entity_id: group.all_devices
+    platform: state
+    from: 'home'
+    to: 'not_home'
+  condition: []
+  action:
+    service: ffmpeg.start
+    entity_id: binary_sensor.camera_motion
+#############################################################################
+- id: 'camera3'
+  alias: Retour appartement -> détecteur mouv. caméra off
+  trigger:
+  - entity_id: group.all_devices
+    platform: state
+    from: 'not_home'
+    to: 'home'
+  condition: []
+  action:
+    service: ffmpeg.stop
+    entity_id: binary_sensor.camera_motion
