@@ -1,9 +1,9 @@
 group.all_lights:
   friendly_name: Lumières
   hidden: false
-
 sensor.weather_temperature:
   friendly_name: Température extérieure
-
 binary_sensor.camera_motion:
   friendly_name: Mouvement
+sensor.activite_hdd:
+  icon: mdi:harddisk

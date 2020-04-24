@@ -1,6 +1,134 @@
-#############################################################################
 - id: salon1
-  alias: IM salon (CDL) -> amp. salon moyenne
+  alias: IM salon (gauche) et amp. salon off -> amp. salon on
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_left
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.AmpouleSalon
+    state: 'off'
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom
+#############################################################################
+- id: salon2
+  alias: IM salon (CGL) -> amp. salon faible
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_left
+      click_type: long
+  condition: []
+  action:
+  - service: light.turn_on
+    entity_id: light.AmpouleSalon
+    data_template:
+      brightness: 100
+      kelvin: 3000
+#############################################################################
+- id: salon3
+  alias: IM salon (gauche) et amp. salon on -> amp. salon off
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_left
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.AmpouleSalon
+    state: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_off_livingroom
+#############################################################################
+- id: salon4
+  alias: IM salon (droit) et amp. bureau off -> amp. bureau on
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_right
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.AmpouleBureau
+    state: 'off'
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_on_desk
+#############################################################################
+- id: salon5
+  alias: IM salon (CDL) -> amp. bureau faible
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_right
+      click_type: long
+  condition: []
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_on_desk_weak
+#############################################################################
+- id: salon6
+  alias: IM salon (droit) et amp. bureau on -> amp. bureau off
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_right
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.AmpouleBureau
+    state: 'on'
+  action:
+    service: script.turn_on
+    entity_id: script.turn_off_desk
+#############################################################################
+- id: salon7
+  alias: IM salon (CD) et salon off -> amp. salon & salon on
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_both
+      click_type: both
+  condition:
+  - condition: state
+    entity_id: light.Lumiere_Salon
+    state: 'off'
+  action:
+    - service: script.turn_on
+      entity_id: script.turn_on_livingroom
+    - service: script.turn_on
+      entity_id: script.turn_on_desk
+#############################################################################
+- id: salon8
+  alias: IM salon (CD) et salon on -> amp. salon & salon off
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_livingroom_both
+      click_type: both
+  condition:
+  - condition: state
+    entity_id: light.Lumiere_Salon
+    state: 'on'
+  action:
+    - service: script.turn_on
+      entity_id: script.turn_off_livingroom
+    - service: script.turn_on
+      entity_id: script.turn_off_desk
+#############################################################################
+- id: salon9
+  alias: IM salon (CDL) et amp. salon off -> amp. salon faible et bureau faible
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
@@ -9,58 +137,12 @@
       click_type: long_both
   condition: []
   action:
-  - service: light.turn_on
-    entity_id: light.Lumiere_Salon
-    data:
-      brightness: 150
-      kelvin: 4000
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_weak
+  - service: script.turn_on
+    entity_id: script.turn_on_desk_weak
 #############################################################################
-- id: salon2
-  alias: IM salon (gauche) -> amp. salon forte
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_livingroom_left
-      click_type: single
-  condition: []
-  action:
-  - service: light.turn_on
-    entity_id: light.Lumiere_Salon
-    data:
-      brightness: 255
-      kelvin: 4500
-#############################################################################
-- id: salon3
-  alias: IM salon (droit) -> amp. salon faible
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_livingroom_right
-      click_type: single
-  condition: []
-  action:
-  - service: light.turn_on
-    entity_id: light.Lumiere_Salon
-    data:
-      brightness: 150
-      kelvin: 3300
-#############################################################################
-- id: salon4
-  alias: IM salon (CSim) -> amp. salon off
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_livingroom_both
-      click_type: both
-  condition: []
-  action:
-  - service: light.turn_off
-    entity_id: light.Lumiere_Salon
-#############################################################################
-- id: salon5
+- id: salon10
   alias: IP salon (CS) -> amp. salon on /off
   trigger:
     platform: event
@@ -73,7 +155,7 @@
   - service: light.toggle
     entity_id: light.Lumiere_Salon
 #############################################################################
-- id: salon6
+- id: salon11
   alias: IP salon (CL) -> amp. salon faible
   trigger:
     platform: event
@@ -89,7 +171,7 @@
       brightness: 125
       kelvin: 3300
 #############################################################################
-- id: salon7
+- id: salon12
   alias: IP salon (CD) -> amp. salon forte
   trigger:
     platform: event
@@ -105,7 +187,7 @@
       brightness: 255
       kelvin: 4500
 #############################################################################
-- id: salon8
+- id: salon13
   alias: TV éteinte & lumières éteintes -> gateway jusqu'à allumage lumière
   trigger:
     platform: template 
@@ -113,11 +195,14 @@
       {{ states.media_player.lg_oled55b7.attributes.entity_picture == null }}
   condition:
   - condition: state
-    entity_id: group.all_lights
+    entity_id: light.AmpouleCuisine
+    state: 'off'
+  - condition: state
+    entity_id: light.Lumiere_Salon
     state: 'off'
   - condition: numeric_state
     entity_id: sensor.illumination_gateway
-    below: 120
+    below: 200
   action:
   - service: light.turn_on
     entity_id: light.gateway
@@ -132,7 +217,7 @@
   - service: light.turn_off
     entity_id: light.gateway
 #############################################################################
-- id: salon9
+- id: salon14
   alias: Température < 18°C -> notification
   trigger:
     platform: time_pattern
@@ -154,7 +239,139 @@
         tag: temperature-notification
 #############################################################################
 - id: cuisine1
-  alias: IM cuisine (CDL) -> amp. cuisine moyenne
+  alias: IM cuisine (gauche) et amp. cuisine off -> amp. cuisine on
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_left
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.AmpouleCuisine
+    state: 'off'
+  action:
+    service: script.turn_on
+    entity_id: script.turn_on_kitchen
+#############################################################################
+- id: cuisine2
+  alias: IM cuisine (CGL) -> amp. cuisine faible
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_left
+      click_type: long
+  condition: []
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_on_kitchen_weak
+#############################################################################
+- id: cuisine3
+  alias: IM cuisine (gauche) et amp. cuisine on -> amp. cuisine off
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_left
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.AmpouleCuisine
+    state: 'on'
+  action:
+    service: script.turn_on
+    entity_id: script.turn_off_kitchen
+#############################################################################
+- id: cuisine4
+  alias: IM cuisine (droit) et salon off -> lumiere salon on
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_right
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.Lumiere_Salon
+    state: 'off'
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom
+  - service: script.turn_on
+    entity_id: script.turn_on_desk
+#############################################################################
+- id: cuisine5
+  alias: IM cuisine (CDL) -> salon faible
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_right
+      click_type: long
+  condition: []
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_weak
+  - service: script.turn_on
+    entity_id: script.turn_on_desk_weak
+#############################################################################
+- id: cuisine6
+  alias: IM cuisine (droit) et salon on -> salon off
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_right
+      click_type: single
+  condition:
+  - condition: state
+    entity_id: light.Lumiere_Salon
+    state: 'on'
+  action:
+  - service: script.turn_on
+    entity_id: script.turn_off_livingroom
+  - service: script.turn_on
+    entity_id: script.turn_off_desk
+#############################################################################
+- id: cuisine7
+  alias: IM cuisine (CD) et amp. cuisine off -> amp. cuisine & salon on
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_both
+      click_type: both
+  condition:
+  - condition: state
+    entity_id: light.AmpouleCuisine
+    state: 'off'
+  action:
+    - service: script.turn_on
+      entity_id: script.turn_on_kitchen
+    - service: script.turn_on
+      entity_id: script.turn_on_livingroom
+#############################################################################
+- id: cuisine8
+  alias: IM cuisine (CD) et amp. cuisine on -> amp. cuisine & salon off
+  trigger:
+    platform: event
+    event_type: xiaomi_aqara.click
+    event_data:
+      entity_id: binary_sensor.wall_kitchen_both
+      click_type: both
+  condition:
+  - condition: state
+    entity_id: light.AmpouleCuisine
+    state: 'on'
+  action:
+    - service: script.turn_on
+      entity_id: script.turn_off_kitchen
+    - service: script.turn_on
+      entity_id: script.turn_off_livingroom
+#############################################################################
+- id: cuisine9
+  alias: IM cuisine (CDL) et amp. cuisine off -> amp. cuisine faible et salon faible
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
@@ -163,99 +380,10 @@
       click_type: long_both
   condition: []
   action:
-  - service: light.turn_on
-    entity_id: light.AmpouleCuisine
-    data:
-      brightness: 150
-      kelvin: 4000
-  - service: light.turn_off
-    entity_id: light.gateway
-#############################################################################
-- id: cuisine2
-  alias: IM cuisine (gauche) -> amp. cuisine fort
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_kitchen_left
-      click_type: single
-  condition: []
-  action:
-  - service: light.turn_on
-    entity_id: light.AmpouleCuisine
-    data:
-      brightness: 255
-      kelvin: 5000
-  - service: light.turn_off
-    entity_id: light.gateway
-#############################################################################
-- id: cuisine3
-  alias: IM cuisine (droit) -> amp. cuisine faible
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_kitchen_right
-      click_type: single
-  condition: []
-  action:
-  - service: light.turn_on
-    entity_id: light.AmpouleCuisine
-    data:
-      brightness: 100
-      kelvin: 3000
-  - service: light.turn_off
-    entity_id: light.gateway
-#############################################################################
-- id: cuisine4
-  alias: IM cuisine (CSim) -> amp. cuisine off
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_kitchen_both
-      click_type: both
-  condition: []
-  action:
-  - service: light.turn_off
-    entity_id: light.AmpouleCuisine
-#############################################################################
-- id: cuisine5
-  alias: IM cuisine (CLDroit) et gateway off -> gateway on
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_kitchen_right
-      click_type: long
-  condition:
-  - condition: state
-    entity_id: light.gateway
-    state: 'off'
-  action:
-  - service: light.turn_on
-    entity_id: light.gateway
-    data:
-      rgb_color: [255, 120, 19]
-      brightness: 255
-  - service: light.turn_off
-    entity_id: light.AmpouleCuisine
-#############################################################################
-- id: cuisine6
-  alias: IM cuisine (CLDroit) et gateway on -> gateway off
-  trigger:
-    platform: event
-    event_type: xiaomi_aqara.click
-    event_data:
-      entity_id: binary_sensor.wall_kitchen_right
-      click_type: long
-  condition:
-  - condition: state
-    entity_id: light.gateway
-    state: 'on'
-  action:
-  - service: light.turn_off
-    entity_id: light.gateway
+  - service: script.turn_on
+    entity_id: script.turn_on_kitchen_weak
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_weak
 #############################################################################
 - id: chambre1
   alias: IM chambre (CS) et amp. chambre off -> Chambre on
@@ -266,12 +394,19 @@
       entity_id: binary_sensor.wall_bedroom
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.AmpouleChambre
-    state: 'off'
-  - condition: state
-    entity_id: light.LampeChevet
-    state: 'off'
+    condition: and
+    conditions:
+    - condition: state
+      entity_id: light.AmpouleChambre
+      state: 'off'
+    - condition: or
+      conditions:
+      - condition: state
+        entity_id: light.LampeChevet
+        state: 'off'
+      - condition: state
+        entity_id: light.LampeChevet
+        state: 'unavailable'
   action:
     service: script.turn_on
     entity_id: script.turn_on_bedroom
@@ -347,7 +482,7 @@
     event_type: xiaomi_aqara.click
     event_data:
       entity_id: binary_sensor.portable_bedroom
-      click_type: long
+      click_type: long_click_press
   action:
     service: script.turn_on
     entity_id: script.turn_on_bedroom_weak
@@ -873,7 +1008,7 @@
     to: 'on'
   condition:
   - condition: state
-    entity_id: group.all_devices
+    entity_id: group.admin_devices
     state: 'not_home'
   action:
   - service: script.turn_on
@@ -886,7 +1021,7 @@
 - id: 'camera2'
   alias: Départ appartement -> détecteur mouv. caméra on
   trigger:
-  - entity_id: group.all_devices
+  - entity_id: group.admin_devices
     platform: state
     from: 'home'
     to: 'not_home'
@@ -898,7 +1033,7 @@
 - id: 'camera3'
   alias: Retour appartement -> détecteur mouv. caméra off
   trigger:
-  - entity_id: group.all_devices
+  - entity_id: group.admin_devices
     platform: state
     from: 'not_home'
     to: 'home'

@@ -14,7 +14,8 @@ homeassistant:
   customize: !include customize.yaml
   whitelist_external_dirs:
     - /config/Recordings
-    - /tmp
+    - /config/ssl
+    - /config/sh
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
@@ -26,7 +27,10 @@ default_config:
 http:
   ssl_certificate: ./ssl/fullchain.pem
   ssl_key: ./ssl/privkey.pem
-  base_url: tranquility-base.duckdns.org:8123
+  base_url: tranquility-base.duckdns.org
+  use_x_forwarded_for: true
+  trusted_proxies: 
+   - 127.0.0.1
 
 # Discover some devices automatically
 discovery:
@@ -69,6 +73,9 @@ light:
       - light.AmpouleBureau
 
 sensor:
+  - platform: file
+    name: Activité hdd
+    file_path: /config/sh/hddspinsensor.txt
   - platform: command_line
     name: Température CPU
     command: "cat /sys/class/thermal/thermal_zone0/temp"

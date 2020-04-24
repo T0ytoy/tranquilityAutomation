@@ -54,6 +54,121 @@ turn_off_bedroom:
   - service: script.turn_off
     entity_id: script.sunset_bedroom
 
+turn_on_kitchen:
+  alias: Allumer cuisine
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleCuisine
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          100
+        {% else %}
+          255
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3000
+        {% else %}
+          5000
+        {% endif %}
+turn_on_kitchen_weak:
+  alias: Allumer cuisine (doux)
+  sequence:
+  - service: light.turn_off
+    entity_id: light.gateway
+  - service: light.turn_on
+    entity_id: light.AmpouleCuisine
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          0
+        {% else %}
+          50
+        {% endif %}
+      kelvin: 2500
+  - service: light.turn_on
+    entity_id: light.gateway
+    data_template:
+      rgb_color: [255, 120, 19]
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          255
+        {% else %}
+          0
+        {% endif %}
+turn_off_kitchen:
+  alias: Eteindre cuisine
+  sequence:
+  - service: light.turn_off
+    entity_id: light.AmpouleCuisine
+  - service: light.turn_off
+    entity_id: light.gateway
+
+turn_on_livingroom:
+  alias: Allumer salon
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleSalon
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          100
+        {% else %}
+          255
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3000
+        {% else %}
+          4500
+        {% endif %}
+turn_on_livingroom_weak:
+  alias: Allumer salon (doux)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleSalon
+    data_template:
+      brightness: 50
+      kelvin: 3000
+turn_off_livingroom:
+  alias: Eteindre salon
+  sequence:
+  - service: light.turn_off
+    entity_id: light.AmpouleSalon
+
+turn_on_desk:
+  alias: Allumer bureau
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleBureau
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          100
+        {% else %}
+          255
+        {% endif %}
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3000
+        {% else %}
+          4500
+        {% endif %}
+turn_on_desk_weak:
+  alias: Allumer bureau (doux)
+  sequence:
+  - service: light.turn_on
+    entity_id: light.AmpouleBureau
+    data_template:
+      brightness: 25
+      kelvin: 3000
+turn_off_desk:
+  alias: Eteindre bureau
+  sequence:
+  - service: light.turn_off
+    entity_id: light.AmpouleBureau
+
 turn_on_bathroom:
   alias: Allumer salle de bain
   sequence:

@@ -1,3 +1,9 @@
+  admin_devices:
+    name: Appareils admin
+    entities:
+      - device_tracker.smartphone_anh
+      - device_tracker.smartphone_antoine
+  
   default_view:
     view: true
     icon: mdi:home
@@ -95,6 +101,7 @@
       - sensor.processor_use
       - sensor.memory_use_percent
       - sensor.temperature_cpu
+      - sensor.activite_hdd
       - sensor.weather_temperature
       - sun.sun
 
