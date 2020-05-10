@@ -34,6 +34,9 @@
       - media_player.chambre
       - script.speakers_timer_start
       - input_number.speakers_turnoff_timer
+      - automation.volume_musique_chambre_diminue_si_lumiere_eteinte
+      - input_number.speakers_target_volume
+      - input_number.speakers_volume_change_duration
 
   automations:
     name: Automatisations

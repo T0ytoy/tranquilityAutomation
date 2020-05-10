@@ -213,6 +213,7 @@
       {{ is_state('light.AmpouleSalon', 'on') 
         or is_state('light.AmpouleCuisine', 'on') 
         or is_state('light.AmpouleCouloir', 'on')
+        or states.media_player.lg_oled55b7.attributes.entity_picture != null
       }}
   - service: light.turn_off
     entity_id: light.gateway
@@ -250,6 +251,9 @@
   - condition: state
     entity_id: light.AmpouleCuisine
     state: 'off'
+  - condition: state
+    entity_id: light.gateway
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.turn_on_kitchen
@@ -276,9 +280,14 @@
       entity_id: binary_sensor.wall_kitchen_left
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.AmpouleCuisine
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.AmpouleCuisine
+      state: 'on'
+    - condition: state
+      entity_id: light.gateway
+      state: 'on'
   action:
     service: script.turn_on
     entity_id: script.turn_off_kitchen
@@ -526,10 +535,10 @@
     platform: time_pattern
     minutes: '/15'
   condition:
-  # moins de 18°C à l'extérieur
+  # moins de 14°C à l'extérieur
   - condition: numeric_state
     entity_id: sensor.weather_temperature
-    below: 18
+    below: 14
   # Apres 23h & avant 1h
   - condition: template
     value_template: >      
@@ -612,11 +621,28 @@
     platform: state
     from: 'playing'
   action:
-  - delay: 00:00:02
+  - delay: 00:00:05
+  - condition: template
+    value_template: >
+      {{ not is_state('media_player.chambre', 'playing') }}
   - service: switch.turn_off
     entity_id: switch.speakers_smart_plug
 #############################################################################
 - id: chambre16
+  alias: Lecture média chromecast audio et extinction lumière chambre -> démarrage timer musique
+  trigger:
+  - entity_id: light.lumiere_chambre
+    platform: state
+    to: 'off'
+  condition:
+  - condition: state
+    entity_id: media_player.chambre
+    state: 'playing'
+  action:
+    service: script.turn_on
+    entity_id: script.speakers_timer_start
+#############################################################################
+- id: chambre17
   alias: Décompte extinction enceintes chambres
   trigger:
     platform: time_pattern
@@ -633,10 +659,55 @@
   - condition: numeric_state
     entity_id: input_number.speakers_turnoff_timer
     below: 1
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.speakers_turnoff_timer
+      value: 90
   - service: media_player.turn_off
     entity_id: media_player.chambre
   - service: script.turn_off
     entity_id: script.speakers_timer_start
+#############################################################################
+- id: chambre18
+  alias: Volume musique chambre diminue si lumière éteinte
+  trigger:
+    platform: time_pattern
+    seconds: '/6'
+  condition:
+  - condition: state
+    entity_id: media_player.chambre
+    state: 'playing'
+  - condition: state
+    entity_id: light.lumiere_chambre
+    state: 'off'
+  action:
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.speakers_start_volume
+      value: >
+        {% if states.input_number.speakers_start_volume.state | float == 0 %}
+          {{ state_attr("media_player.chambre", "volume_level") | float }}
+        {% else %}
+          {{ states.input_number.speakers_start_volume.state | float }}
+        {% endif %}
+  - service: media_player.volume_set
+    data_template:
+      entity_id: media_player.chambre
+      volume_level: >
+        {% set step = (states.input_number.speakers_start_volume.state | float - states.input_number.speakers_target_volume.state | float/100) / (states.input_number.speakers_volume_change_duration.state | float * 10) %}
+        {% set result = state_attr("media_player.chambre", "volume_level") | float - step %}
+        {% if result < states.input_number.speakers_target_volume.state | float/100 %}
+          {{ states.input_number.speakers_target_volume.state | float/100 }}
+        {% else %}
+          {{ result }}
+        {% endif %}
+  - condition: template
+    value_template: >
+      {{ state_attr("media_player.chambre", "volume_level") | float <=  states.input_number.speakers_target_volume.state | float/100}}
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.speakers_start_volume
+      value: 0.0
 #############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on

@@ -19,13 +19,13 @@ turn_on_bedroom:
 turn_on_bedroom_weak:
   alias: Allumer chambre (doux)
   sequence:
-  - service: light.turn_off
-    entity_id: light.AmpouleChambre
   - service: light.turn_on
     entity_id: light.LampeChevet
     data_template:
       brightness: 50
       kelvin: 3000
+  - service: light.turn_off
+    entity_id: light.AmpouleChambre
 turn_on_bedroom_strong:
   alias: Allumer chambre (fort)
   sequence:
@@ -315,6 +315,8 @@ speakers_timer_start:
   sequence:
     - service: automation.turn_on
       entity_id: automation.chambre16
+    - service: automation.turn_on
+      entity_id: automation.chambre17
     - delay: 04:00:00
 
 record_camera:
