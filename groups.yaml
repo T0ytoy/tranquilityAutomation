@@ -8,26 +8,89 @@
     view: true
     icon: mdi:home
     entities:
-      - group.all_lights
-      - group.multimedia
-      - group.basic_sensors
-      - group.switches
- 
-  multimedia:
-    name: Multimédia
-    view: yes
+      - weather.appartement
+      - group.livingroom
+      - group.kitchen
+      - group.bedroom
+      - group.bathroom
+      - group.hall
+      - group.raspberry
+      
+  livingroom:
+    name: Salon
+    view: no
     entities:
-      - media_player.lg_oled55b7
-      - group.multimedia_bedroom_audio
-
-  camera:
-    name: Caméra
-    view: yes
-    entities:
-      - camera.ffmpeg
+      - group.livingroom_lights
+      - group.livingroom_multimedia
+      - sensor.temperature_livingroom
+      - sensor.humidity_livingroom
+      - sensor.pressure_livingroom
       - binary_sensor.camera_motion
+      
+  kitchen:
+    name: Cuisine
+    view: no
+    entities:
+      - light.AmpouleCuisine
+      - light.gateway
+      - sensor.illumination_gateway
+      
+  bedroom:
+    name: Chambre
+    view: no
+    entities:
+      - light.AmpouleChambre
+      - light.LampeChevet
+      - sensor.temperature_bedroom
+      - sensor.humidity_bedroom
+      - sensor.pressure_bedroom
+      - group.bedroom_multimedia
+      - group.bedroom_switches
+      
+  bathroom:
+    name: Salle de bain
+    view: no
+    entities:
+      - light.AmpouleSalleDeBain
+      
+  toilets:
+    name: Toilettes
+    view: no
+    entities:
+      - light.AmpouleToilettes 
 
-  multimedia_bedroom_audio:
+  hall:
+    name: Couloir
+    view: no
+    entities:
+      - light.AmpouleCouloir
+      - sensor.illumination_hall
+      - binary_sensor.motion_sensor_hall
+      
+  raspberry:
+    name: Raspberry
+    view: no
+    entities: 
+      - sensor.processor_use
+      - sensor.memory_use_percent
+      - sensor.temperature_cpu  
+      - sensor.activite_hdd
+      - sensor.last_boot  
+   
+  livingroom_lights:
+    name: Lumières
+    view: no
+    entities:
+      - light.AmpouleSalon
+      - light.AmpouleBureau
+     
+  livingroom_multimedia:
+    name: TV
+    view: no
+    entities:
+      - media_player.lg_oled55b7      
+
+  bedroom_multimedia:
     name: Audio chambre
     view: no
     entities:
@@ -37,6 +100,19 @@
       - automation.volume_musique_chambre_diminue_si_lumiere_eteinte
       - input_number.speakers_target_volume
       - input_number.speakers_volume_change_duration
+    
+  multimedia:
+    name: Multimédia
+    view: yes
+    entities:
+      - media_player.lg_oled55b7
+      - media_player.chambre
+
+  camera:
+    name: Caméra
+    view: yes
+    entities:
+      - camera.ffmpeg
 
   automations:
     name: Automatisations
@@ -108,7 +184,7 @@
       - sensor.weather_temperature
       - sun.sun
 
-  switches:
+  bedroom_switches:
     name: Prises connectées
     view: no
     entities:

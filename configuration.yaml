@@ -25,9 +25,9 @@ default_config:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 http:
-  ssl_certificate: ./ssl/fullchain.pem
-  ssl_key: ./ssl/privkey.pem
-  base_url: tranquility-base.duckdns.org
+  ssl_certificate: /etc/letsencrypt/live/tranquility-base.eu/fullchain.pem
+  ssl_key: /etc/letsencrypt/live/tranquility-base.eu/privkey.pem
+  base_url: tranquility-base.eu
   use_x_forwarded_for: true
   trusted_proxies: 
    - 127.0.0.1
@@ -95,12 +95,10 @@ sensor:
   - platform: systemmonitor
     resources:
     - type: disk_use_percent
-      arg: /home
+      arg: /
+    - type: disk_use_percent
+      arg: /mnt/hdd
     - type: memory_use_percent
-    - type: network_in
-      arg: eth0
-    - type: network_out
-      arg: eth0
     - type: processor_use
     - type: last_boot
   - platform: time_date

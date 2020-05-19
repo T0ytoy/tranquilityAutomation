@@ -1,9 +1,32 @@
+group.livingroom:
+  icon: mdi:home
 group.all_lights:
   friendly_name: Lumières
   hidden: false
 sensor.weather_temperature:
   friendly_name: Température extérieure
 binary_sensor.camera_motion:
-  friendly_name: Mouvement
+  friendly_name: Mouvement2
 sensor.activite_hdd:
   icon: mdi:harddisk
+group.livingroom_lights:
+  hidden: true
+group.bedroom_multimedia:
+  hidden: true
+group.multimedia_livingroom:
+  hidden: true
+group.bedroom_switches:
+  hidden: true
+group.livingroom_multimedia:
+  hidden: true
+sensor.battery_level_antoine:
+  custom_ui_more_info: test
+  friendly_name: Batterie Antoine
+  icon: mdi:battery
+sensor.battery_level_anh:
+  friendly_name: Batterie Anh
+  icon: mdi:battery
+sensor.temperature_bedroom:
+  friendly_name: Température chambre
+sensor.temperature_livingroom:
+  friendly_name: Température salon
