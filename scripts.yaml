@@ -218,6 +218,24 @@ turn_on_bathroom_strong:
         {% else %}
           4500
         {% endif %}
+  - service: light.turn_on
+    entity_id: light.lumiere_miroir_salle_de_bain
+    data_template:
+      brightness: 255
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3500
+        {% else %}
+          4500
+        {% endif %}
+turn_off_bathroom:
+  alias: Eteindre la salle de bain
+  sequence:
+  - service: light.turn_off
+    entity_id: light.AmpouleSalleDeBain
+  - service: light.turn_off
+    entity_id: light.lumiere_miroir_salle_de_bain
+
 
 turn_on_toilets:
   alias: Allumer les toilettes

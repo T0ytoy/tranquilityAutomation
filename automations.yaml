@@ -638,6 +638,10 @@
   - condition: state
     entity_id: media_player.chambre
     state: 'playing'
+# handle this light going unavailable regularly
+  - condition: state
+    entity_id: light.lampechevet
+    state: 'off'
   action:
     service: script.turn_on
     entity_id: script.speakers_timer_start
@@ -680,6 +684,10 @@
   - condition: state
     entity_id: light.lumiere_chambre
     state: 'off'
+# handle this light going unavailable regularly
+  - condition: state
+    entity_id: light.lampechevet
+    state: 'off' 
   action:
   - service: input_number.set_value
     data_template:
@@ -843,8 +851,8 @@
     entity_id: light.AmpouleSalleDeBain
     state: 'on'
   action:
-  - service: light.turn_off
-    entity_id: light.AmpouleSalleDeBain
+  - service: script.turn_on
+    entity_id: script.turn_off_bathroom
 #############################################################################
 - id: toilets1
   alias: IM toilettes (CS) et amp. toilettes off -> toilettes on

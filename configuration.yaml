@@ -76,6 +76,11 @@ light:
     entities:
       - light.AmpouleChambre
       - light.LampeChevet
+  - platform: group
+    name: Lumière Miroir Salle de Bain
+    entities: 
+      - light.bathroom_bulb_1_cwww
+      - light.bathroom_bulb_2_cwww
 
 sensor:
   - platform: file
@@ -173,7 +178,7 @@ input_number:
 
 # You can leave MAC empty if you only have one gateway.
 xiaomi_aqara:
-  discovery_retry: 15
+  discovery_retry: 8
   gateways:
     - key: !secret gatewayKey
 
