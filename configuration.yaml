@@ -27,24 +27,20 @@ default_config:
 http:
   ssl_certificate: /etc/letsencrypt/live/tranquility-base.eu/fullchain.pem
   ssl_key: /etc/letsencrypt/live/tranquility-base.eu/privkey.pem
-  base_url: tranquility-base.eu
   use_x_forwarded_for: true
   trusted_proxies: 
    - 127.0.0.1
 
-# Discover some devices automatically
-discovery:
-  ignore:
-    - yeelight
-    - apple_tv
-    - belkin_wemo
-    - bluesound
-    - bose_soundtouch
-    - plex_mediaserver
-
 script: !include scripts.yaml
 group: !include groups.yaml
 automation: !include automations.yaml
+
+xiaomi_aqara:
+  discovery_retry: 15
+  gateways:
+    - key: !secret gatewayKey
+
+#zha_map:
 
 yeelight:
   devices:
@@ -81,6 +77,11 @@ light:
     entities: 
       - light.bathroom_bulb_1_cwww
       - light.bathroom_bulb_2_cwww
+  - platform: group
+    name: Lumière Miroir Salle de Bain RGB
+    entities: 
+      - light.bathroom_bulb_1_rgb
+      - light.bathroom_bulb_2_rgb
 
 sensor:
   - platform: file
@@ -106,6 +107,23 @@ sensor:
     - type: memory_use_percent
     - type: processor_use
     - type: last_boot
+  - platform: integration
+    source: sensor.tv_power_usage
+    name: tv_energy_spent
+    unit_prefix: k
+    method: left
+    round: 2
+  - platform: integration
+    source: sensor.m365_power_usage
+    name: m365_energy_spent
+    unit_prefix: k
+    method: left
+    round: 2
+  - platform: integration
+    source: sensor.livingroom_multimedia_power_usage
+    name: livingroom_multimedia_energy_spent
+    unit_prefix: k
+    round: 2
   - platform: time_date
     display_options:
       - 'time'
@@ -115,6 +133,73 @@ sensor:
       - 'time_date'
       - 'time_utc'
       - 'beat'
+  - platform: derivative
+    source: sensor.battery_level_antoine
+    round: 1
+    unit: "%/h"
+    time_window: "00:15:00"
+  - platform: template
+    sensors:
+      battery_derivative_positive_antoine:
+        friendly_name: "Charge batterie Antoine"
+        unit_of_measurement: '%/h'
+        value_template: >
+          {% if states.sensor.sensor_battery_level_antoine_derivative.state | float > 0 %}
+            {{ states.sensor.sensor_battery_level_antoine_derivative.state | float }}
+          {% else %}
+            0
+          {% endif %}
+      battery_derivative_negative_antoine:
+        friendly_name: "Décharge batterie Antoine"
+        unit_of_measurement: '%/h'
+        value_template: >
+          {% if states.sensor.sensor_battery_level_antoine_derivative.state | float < 0 %}
+            {{ states.sensor.sensor_battery_level_antoine_derivative.state | float }}
+          {% else %}
+            0
+          {% endif %}
+  - platform: derivative
+    source: sensor.battery_level_anh
+    round: 1
+    unit: "%/h"
+    time_window: "00:15:00"
+  - platform: template
+    sensors:
+      battery_derivative_positive_anh:
+        friendly_name: "Charge batterie Anh"
+        unit_of_measurement: '%/h'
+        value_template: >
+          {% if states.sensor.sensor_battery_level_anh_derivative.state | float > 0 %}
+            {{ states.sensor.sensor_battery_level_anh_derivative.state | float }}
+          {% else %}
+            0
+          {% endif %}
+      battery_derivative_negative_anh:
+        friendly_name: "Décharge batterie Anh"
+        unit_of_measurement: '%/h'
+        value_template: >
+          {% if states.sensor.sensor_battery_level_anh_derivative.state | float < 0 %}
+            {{ states.sensor.sensor_battery_level_anh_derivative.state | float }}
+          {% else %}
+            0
+          {% endif %}
+  - platform: statistics
+    entity_id: sensor.battery_derivative_negative_antoine
+    name: battery_derivative_negative_antoine_statistics
+    sampling_size: 4
+    max_age:
+      minutes: 45
+
+utility_meter:
+  monthly_tv_power_usage:
+    source: sensor.tv_energy_spent
+    cycle: monthly
+  monthly_multimedia_power_usage:
+    source: sensor.livingroom_multimedia_energy_spent
+    cycle: monthly
+  monthly_m365_power_usage:
+    source: sensor.m365_energy_spent
+    cycle: monthly
 
 input_datetime:
   morning_routine_date_time:
@@ -175,25 +260,32 @@ input_number:
     max: 100
     step: 1
     mode: box
-
-# You can leave MAC empty if you only have one gateway.
-xiaomi_aqara:
-  discovery_retry: 8
-  gateways:
-    - key: !secret gatewayKey
+    
+timer:
+  m365_charge_timer:
+    name: temps de charge restant
+    duration: '01:10:00'
 
 wake_on_lan:
 
-media_player:
-  - platform: webostv
-    name: LG_OLED55B7
-    host: 192.168.0.26
-    timeout: 4
-    turn_on_action:
+webostv:
+  host: 192.168.0.26
+  name: LG_OLED55B7
+  turn_on_action:
       service: wake_on_lan.send_magic_packet
       data:
         mac: "20:3D:BD:01:7B:0A"
-  - platform: plex
+
+# media_player:
+  # - platform: webostv
+    # name: LG_OLED55B7
+    # host: 192.168.0.26
+    # timeout: 4
+    # turn_on_action:
+      # service: wake_on_lan.send_magic_packet
+      # data:
+        # mac: "20:3D:BD:01:7B:0A"
+  # - platform: plex
 
 notify:
   - platform: webostv
@@ -201,8 +293,8 @@ notify:
     name: LG_OLED55B7
   - platform: html5
     name: Antoine_notification
-    vapid_pub_key: BBw5KDowbSWcJSLhISTIOxaXnu6SQHeCPaUiRza8fiy9GJeXIhC_kS9HUHIFINsDmH_9Qr79tHuuzku5pOPYBlQ
-    vapid_prv_key: JRtMffWLI9mBlKS-Qr7Sc549fhYwuO2O0xXo63YbBXY
+    vapid_pub_key: BPXPgvtb_hedm1UXjYk1zQi75CCQCEyeK5cE-HnM4WjR5FCB69q3i9ct9WYLfHJ9-Vw1EuAPqxTbmNQJKmxs4S8
+    vapid_prv_key: D4BIhir6k0CFn_tkSmrRe2Yx6yY4DO3bCfkB07D58Gc
     vapid_email: jouet.antoine@gmail.com
   - name: antoine_anh_tv
     platform: group
@@ -210,26 +302,27 @@ notify:
       - service: antoine_notification
       - service: lg_oled55b7
 
-google_assistant:
-  project_id: assistantautomationintegration
-  api_key: !secret googleCloudApiKey
-  exposed_domains:
-    - light
-    - media_player
-    - switch
-  entity_config:
-    media_player.lg_oled55b7:
-      expose: true
-    script.sunset_bedroom:
-      expose: true
-    group.all_automations:
-      expose: false
+# google_assistant:
+  # project_id: assistantautomationintegration
+  # api_key: !secret googleCloudApiKey
+  # exposed_domains:
+    # - light
+    # - media_player
+    # - switch
+  # entity_config:
+    # media_player.lg_oled55b7:
+      # expose: true
+    # script.sunset_bedroom:
+      # expose: true
+    # group.all_automations:
+      # expose: false
 
 
 device_tracker:
   - platform: nmap_tracker
     hosts: 192.168.0.1/24
     home_interval: 15
+#    consider_home: 0:03:00
     exclude:
       - 192.168.0.44
 
@@ -246,7 +339,5 @@ binary_sensor:
   - platform: ffmpeg_motion
     name: camera_motion
     input: !secret cameraStream
-    changes: 8
-
-
-
+    changes: 14
+    extra_arguments: -vf scale=640:480

@@ -30,3 +30,17 @@ sensor.temperature_bedroom:
   friendly_name: Température chambre
 sensor.temperature_livingroom:
   friendly_name: Température salon
+sensor.m365_energy_spent:
+  icon: mdi:chart-histogram
+  unit_of_measurement: kWh
+sensor.m365_power_usage:
+  device_class: power
+  unit_of_measurement: W
+sensor.monthly_m365_power_usage:
+  unit_of_measurement: kWh
+sensor.monthly_multimedia_power_usage:
+  unit_of_measurement: kWh
+sensor.monthly_tv_power_usage:
+  unit_of_measurement: kWh
+script.m365_limit_charge:
+  icon: mdi:scooter

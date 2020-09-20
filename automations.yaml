@@ -239,10 +239,70 @@
       data:
         tag: temperature-notification
 #############################################################################
-- id: cuisine1
-  alias: IM cuisine (gauche) et amp. cuisine off -> amp. cuisine on
+- id: salon15
+  alias: réassociation prises connectées zigbee
   trigger:
-    platform: event
+    platform: time_pattern
+    minutes: '/90'
+  action:
+  # TV
+  - service: zha.set_zigbee_cluster_attribute
+    data:
+      ieee: 04:cf:8c:df:3c:76:4c:51
+      cluster_id: 0x0000
+      endpoint_id: 1
+      attribute: 0x0001
+      value: 1
+  # multimedia
+  - service: zha.set_zigbee_cluster_attribute
+    data:
+      ieee: 04:cf:8c:df:3c:76:3c:01
+      cluster_id: 0x0000
+      endpoint_id: 1
+      attribute: 0x0001
+      value: 1
+  # m365
+  - service: zha.set_zigbee_cluster_attribute
+    data:
+      ieee: 04:cf:8c:df:3c:75:a4:ae
+      cluster_id: 0x0000
+      endpoint_id: 1
+      attribute: 0x0001
+      value: 1
+#############################################################################
+- id: salon16
+  alias: arrêt charge m365 85%
+  # when m365 power usage gets to ~73 W (~ 77% charge)
+  trigger:
+    platform: numeric_state
+    entity_id: sensor.m365_power_usage
+    above: 50.0
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.m365_power_usage
+    below: 160
+  action:
+  # wait for some time and stop charge
+  - service: script.turn_on
+    entity_id: script.m365_limit_charge
+#############################################################################
+- id: salon17
+  alias: arrêt charge m365 -> arrêt script limitation 85%
+  # when m365 power usage gets to ~73 W (~ 77% charge)
+  trigger:
+    platform: state
+    entity_id: switch.m365_plug
+    from: 'on'
+    to: 'off'
+  action:
+  # wait for one hour and stop charge
+  - service: script.turn_off
+    entity_id: script.m365_limit_charge
+############################################################################# 
+- id: cuisine1
+  alias: IM cuisine (gauche) et amp. cuisine off -> amp. cuisine on 
+  trigger:
+    platform: event 
     event_type: xiaomi_aqara.click
     event_data:
       entity_id: binary_sensor.wall_kitchen_left
@@ -561,7 +621,13 @@
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_antoine.state | int-1 > states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
+      {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int-1 > 60 %}
+      {% set charged_to_limit = states.sensor.battery_level_antoine.state | int-1 > states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
+      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*3600) %} 
+      {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
+      {{ charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up) }}
+# {{ charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up) }}
   action:
     service: switch.turn_off
     entity_id: switch.antoine_phone_smart_plug
@@ -571,11 +637,13 @@
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_antoine.state | int+1 < states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
-  condition:
-  - condition: state
-    entity_id: device_tracker.smartphone_antoine
-    state: 'home'
+      {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int+1 >= 60 %}
+      {% set charged_to_limit = states.sensor.battery_level_antoine.state | int+1 >= states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
+      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*3600) %}  
+      {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
+      {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
+# {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
   action:
     service: switch.turn_on
     entity_id: switch.antoine_phone_smart_plug
@@ -918,13 +986,14 @@
     platform: time_pattern
     minutes: '/1'
   condition:
-  - condition: state
-    entity_id: group.all_lights
-    state: 'off'
+  # all lights are off
+  - condition: template
+    value_template: >
+      {{ states.light | count == states.light | selectattr('state','eq','off') | list | count }}
   - condition: template
     value_template: >
       {% set one_minute_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*60) %} 
-      {{ as_timestamp(now()) | timestamp_custom("%d%m%Y%H%M") == one_minute_before_wake_up | timestamp_custom("%d%m%Y%H%M", false)}}
+      {{ one_minute_before_wake_up - as_timestamp(now()) | round(0) == 0}}
   action:
   - service: light.turn_on
     entity_id: light.LampeChevet
@@ -986,8 +1055,11 @@
     value_template: >
       {% set departure_time_minutes = (states.input_datetime.home_departure_time.attributes.timestamp | timestamp_custom("%H", false) | int * 60 
         + states.input_datetime.home_departure_time.attributes.timestamp | timestamp_custom("%M", false) | int ) %}
-      {% set now_minutes = (as_timestamp(now()) | timestamp_custom("%H") | int * 60 + (as_timestamp(now()) | timestamp_custom("%M") | int)) %}
-      {{ departure_time_minutes - now_minutes < 60 and departure_time_minutes - now_minutes > 0 }}
+      {% set minutes_since_midnight = (as_timestamp(now()) | timestamp_custom("%H") | int * 60 + (as_timestamp(now()) | timestamp_custom("%M") | int)) %}
+      {% set start_of_day = as_timestamp(now()) | string | int - (minutes_since_midnight | int*60) %}
+      {% set departure_timestamp = (start_of_day + departure_time_minutes*60) %}
+      {% set delta = (departure_timestamp - as_timestamp(now()) | int) | int/60 %}  
+      {{ delta < 60 and delta >= 0 }}
 # --------------------------------------
 # attendre l'heure de départ au travail moins 4 minutes
 # --------------------------------------
@@ -1020,7 +1092,7 @@
       brightness_pct: 100
   - delay: 00:06:00
   - service: light.turn_off
-    entity_id: group.all_lights
+    entity_id: all
 #############################################################################
 - id: 'routine2'
   alias: Absence Antoine -> chargeur off
@@ -1078,6 +1150,20 @@
     service: switch.turn_on
     entity_id: switch.anh_phone_smart_plug
 #############################################################################
+- id: routine6
+  alias: Absence appartement -> extinction lumières
+  trigger:
+  - entity_id: group.admin_devices
+    platform: state
+    from: 'home'
+    to: 'not_home'
+    for: 00:10:00
+  action:
+  - service: light.turn_off
+    entity_id: all
+  - service: media_player.turn_off
+    entity_id: media_player.chambre 
+#############################################################################
 - id: 'camera1'
   alias: Absence + mouvement -> enregistrement caméra
   trigger:
@@ -1120,3 +1206,4 @@
   action:
     service: ffmpeg.stop
     entity_id: binary_sensor.camera_motion
+
