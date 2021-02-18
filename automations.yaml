@@ -15,7 +15,7 @@
     entity_id: script.turn_on_livingroom
 #############################################################################
 - id: salon2
-  alias: IM salon (CGL) -> amp. salon faible
+  alias: IM salon (CGL) -> amp. salon + bande tv faible
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
@@ -25,7 +25,7 @@
   condition: []
   action:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.AmpouleSalon, light.livingroom_led_strip
     data_template:
       brightness: 100
       kelvin: 3000
@@ -209,6 +209,11 @@
     data:
       rgb_color: [255, 120, 19]
       brightness: 255
+  - service: light.turn_on
+    entity_id: light.livingroom_led_trip, light.bar_led_strip
+    data:
+      kelvin: 3000
+      brightness: 100
   - wait_template: >
       {{ is_state('light.AmpouleSalon', 'on') 
         or is_state('light.AmpouleCuisine', 'on') 
@@ -216,7 +221,7 @@
         or states.media_player.lg_oled55b7.attributes.entity_picture != null
       }}
   - service: light.turn_off
-    entity_id: light.gateway
+    entity_id: light.gateway, light.bar_led_strip
 #############################################################################
 - id: salon14
   alias: Température < 18°C -> notification
@@ -243,7 +248,7 @@
   alias: réassociation prises connectées zigbee
   trigger:
     platform: time_pattern
-    minutes: '/90'
+    minutes: '/30'
   action:
   # TV
   - service: zha.set_zigbee_cluster_attribute
@@ -1016,11 +1021,11 @@
       transition: 240
   - delay: 00:04:00
   - service: light.turn_on
-    entity_id: light.AmpouleChambre
+    entity_id: light.LampeChevet
     data:
       rgb_color: [255,230,200]
-      brightness_pct: 10
-      transition: 180
+      brightness_pct: 60
+      transition: 25
   - delay: 00:00:05
   - wait_template: >
       {{ is_state('binary_sensor.motion_sensor_hall', 'on') }}
@@ -1130,7 +1135,12 @@
   condition:
     condition: template
     value_template: >
-      {{ states.sensor.battery_level_antoine.state | int+1 < states.input_number.battery_charging_percentage_limit_antoine.state | int  }}
+      {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int+1 >= 60 %}
+      {% set charged_to_limit = states.sensor.battery_level_antoine.state | int+1 >= states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
+      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*3600) %}  
+      {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
+      {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
   action:
     service: switch.turn_on
     entity_id: switch.antoine_phone_smart_plug
@@ -1145,7 +1155,12 @@
   condition:
     condition: template
     value_template: >
-      {{ states.sensor.battery_level_anh.state | int+1 < states.input_number.battery_charging_percentage_limit_anh.state | int  }}
+      {% set charged_to_minimum = states.sensor.battery_level_anh.state | int+1 >= 60 %}
+      {% set charged_to_limit = states.sensor.battery_level_anh.state | int+1 >= states.input_number.battery_charging_percentage_limit_anh.state | int  %}
+      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*3600) %}  
+      {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
+      {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
   action:
     service: switch.turn_on
     entity_id: switch.anh_phone_smart_plug

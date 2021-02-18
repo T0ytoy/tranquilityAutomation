@@ -58,7 +58,7 @@ turn_on_kitchen:
   alias: Allumer cuisine
   sequence:
   - service: light.turn_on
-    entity_id: light.AmpouleCuisine
+    entity_id: light.AmpouleCuisine, light.bar_led_strip
     data_template:
       brightness: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -75,8 +75,6 @@ turn_on_kitchen:
 turn_on_kitchen_weak:
   alias: Allumer cuisine (doux)
   sequence:
-  - service: light.turn_off
-    entity_id: light.gateway
   - service: light.turn_on
     entity_id: light.AmpouleCuisine
     data_template:
@@ -87,6 +85,16 @@ turn_on_kitchen_weak:
           50
         {% endif %}
       kelvin: 2500
+  - service: light.turn_on
+    entity_id: light.bar_led_strip
+    data_template:
+      brightness: 100
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          2500
+        {% else %}
+          3500
+        {% endif %}
   - service: light.turn_on
     entity_id: light.gateway
     data_template:
@@ -101,15 +109,18 @@ turn_off_kitchen:
   alias: Eteindre cuisine
   sequence:
   - service: light.turn_off
-    entity_id: light.AmpouleCuisine
+    entity_id: light.AmpouleCuisine, light.gateway
+  - condition: state
+    entity_id: light.lumiere_salon
+    state: 'off'
   - service: light.turn_off
-    entity_id: light.gateway
+    entity_id: light.bar_led_strip
 
 turn_on_livingroom:
   alias: Allumer salon
   sequence:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
+    entity_id: light.AmpouleSalon, light.livingroom_led_strip
     data_template:
       brightness: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -121,10 +132,11 @@ turn_on_livingroom:
         {% if now().hour >= 22 or now().hour < 09 %}
           3000
         {% else %}
-          4500
-        {% endif %}
+          5000
+        {% endif %}  
+  - delay: 00:00:01
   - service: light.turn_on
-    entity_id: light.livingroom_led_strip
+    entity_id: light.bar_led_strip
     data_template:
       brightness: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -136,18 +148,13 @@ turn_on_livingroom:
         {% if now().hour >= 22 or now().hour < 09 %}
           3000
         {% else %}
-          4500
+          5000
         {% endif %}
 turn_on_livingroom_weak:
   alias: Allumer salon (doux)
   sequence:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon
-    data_template:
-      brightness: 50
-      kelvin: 3000
-  - service: light.turn_on
-    entity_id: light.livingroom_led_strip
+    entity_id: light.AmpouleSalon, light.livingroom_led_strip, light.bar_led_strip
     data_template:
       brightness: 50
       kelvin: 3000
@@ -155,9 +162,12 @@ turn_off_livingroom:
   alias: Eteindre salon
   sequence:
   - service: light.turn_off
-    entity_id: light.AmpouleSalon
+    entity_id: light.AmpouleSalon, light.livingroom_led_strip
+  - condition: state
+    entity_id: light.AmpouleCuisine
+    state: 'off'
   - service: light.turn_off
-    entity_id: light.livingroom_led_strip
+    entity_id: light.bar_led_strip
 
 turn_on_desk:
   alias: Allumer bureau
@@ -209,6 +219,16 @@ turn_on_bathroom:
         {% else %}
           4000
         {% endif %}
+  - service: light.turn_on
+    entity_id: light.lumiere_miroir_salle_de_bain
+    data_template:
+      brightness: 70
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          3000
+        {% else %}
+          4500
+        {% endif %}
 turn_on_bathroom_weak:
   alias: Allumer salle de bain (doux)
   sequence:
@@ -227,6 +247,16 @@ turn_on_bathroom_weak:
         {% else %}
           4000
         {% endif %}
+  - service: light.turn_on
+    entity_id: light.lumiere_miroir_salle_de_bain
+    data_template:
+      brightness: >
+        {% if now().hour >= 22 or now().hour < 09 %}
+          50
+        {% else %}
+          70
+        {% endif %}
+      kelvin: 4000
 turn_on_bathroom_strong:
   alias: Allumer salle de bain (fort)
   sequence:
@@ -238,17 +268,17 @@ turn_on_bathroom_strong:
         {% if now().hour >= 22 or now().hour < 09 %}
           3500
         {% else %}
-          4500
+          3800
         {% endif %}
   - service: light.turn_on
     entity_id: light.lumiere_miroir_salle_de_bain
     data_template:
-      brightness: 255
+      brightness: 200
       kelvin: >
         {% if now().hour >= 22 or now().hour < 09 %}
-          3500
+          3500 
         {% else %}
-          4500
+          6000
         {% endif %}
 turn_off_bathroom:
   alias: Eteindre la salle de bain
@@ -376,6 +406,17 @@ m365_limit_charge:
     # wait for one hour and stop charge
     - service: timer.start    
       entity_id: timer.m365_charge_timer
+      data_template:
+        duration: >
+          {% if states.sensor.m365_power_usage.state | int == 72 %}
+            01:10:00
+          {% elif states.sensor.m365_power_usage.state | int == 73 %}
+            01:00:00
+          {% elif states.sensor.m365_power_usage.state | int == 74 %}
+            00:40:00
+          {% else %}
+            00:00:01
+          {% endif %}
     - wait_template: "{{ states.timer.m365_charge_timer.state == 'idle' }}"
     - service: switch.turn_off
       entity_id: switch.m365_plug
