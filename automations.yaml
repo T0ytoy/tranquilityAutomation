@@ -24,11 +24,8 @@
       click_type: long
   condition: []
   action:
-  - service: light.turn_on
-    entity_id: light.AmpouleSalon, light.livingroom_led_strip
-    data_template:
-      brightness: 100
-      kelvin: 3000
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_weak
 #############################################################################
 - id: salon3
   alias: IM salon (gauche) et amp. salon on -> amp. salon off
@@ -192,7 +189,7 @@
   trigger:
     platform: template 
     value_template: >
-      {{ states.media_player.lg_oled55b7.attributes.entity_picture == null }}
+      {{ states.media_player.lg_oled.attributes.entity_picture == null }}
   condition:
   - condition: state
     entity_id: light.AmpouleCuisine
@@ -218,7 +215,7 @@
       {{ is_state('light.AmpouleSalon', 'on') 
         or is_state('light.AmpouleCuisine', 'on') 
         or is_state('light.AmpouleCouloir', 'on')
-        or states.media_player.lg_oled55b7.attributes.entity_picture != null
+        or states.media_player.lg_oled.attributes.entity_picture != null
       }}
   - service: light.turn_off
     entity_id: light.gateway, light.bar_led_strip
@@ -250,6 +247,9 @@
     platform: time_pattern
     minutes: '/30'
   action:
+  - service: zha.permit
+    data:
+      duration: 15
   # TV
   - service: zha.set_zigbee_cluster_attribute
     data:
@@ -626,56 +626,68 @@
   trigger:
     platform: template
     value_template: >
+      {% set at_home = states.device_tracker.smartphone_antoine.state == 'home' %}
       {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int-1 > 60 %}
       {% set charged_to_limit = states.sensor.battery_level_antoine.state | int-1 > states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
       {% set daytime = (now().hour >= 11 and now().hour <=22) %}
-      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*3600) %} 
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_antoine.attributes.timestamp | int -(1*3600) %} 
       {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
-      {{ charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up) }}
-# {{ charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up) }}
+      {{ not at_home or (charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up)) }}
   action:
-    service: switch.turn_off
-    entity_id: switch.antoine_phone_smart_plug
+  - service: switch.turn_off
+    data:
+      entity_id: switch.antoine_phone_smart_plug
 #############################################################################
 - id: chambre11
   alias: Limiteur batterie Antoine (off->on)
   trigger:
     platform: template
     value_template: >
+      {% set at_home = states.device_tracker.smartphone_antoine.state == 'home' %}
       {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int+1 >= 60 %}
       {% set charged_to_limit = states.sensor.battery_level_antoine.state | int+1 >= states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
       {% set daytime = (now().hour >= 11 and now().hour <=22) %}
-      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*3600) %}  
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_antoine.attributes.timestamp | int -(1*3600) %}  
       {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
-      {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
-# {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
+      {{ at_home and (not charged_to_minimum or (not charged_to_limit and ( daytime or currently_one_hour_before_wake_up))) }}
   action:
     service: switch.turn_on
-    entity_id: switch.antoine_phone_smart_plug
+    data:
+      entity_id: switch.antoine_phone_smart_plug
 #############################################################################
 - id: chambre12
   alias: Limiteur Batterie Anh
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_anh.state | int-1 > states.input_number.battery_charging_percentage_limit_anh.state | int  }}
+      {% set at_home = states.device_tracker.smartphone_anh.state == 'home' %}
+      {% set charged_to_minimum = states.sensor.battery_level_anh.state | int-1 > 60 %}
+      {% set charged_to_limit = states.sensor.battery_level_anh.state | int-1 > states.input_number.battery_charging_percentage_limit_anh.state | int  %}
+      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_anh.attributes.timestamp | int -(1*3600) %} 
+      {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
+      {{ not at_home or (charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up)) }}
   action:
     service: switch.turn_off
-    entity_id: switch.anh_phone_smart_plug
+    data:
+      entity_id: switch.anh_phone_smart_plug
 #############################################################################
 - id: chambre13
   alias: Limiteur batterie Anh (off->on)
   trigger:
     platform: template
     value_template: >
-      {{ states.sensor.battery_level_anh.state | int+1 < states.input_number.battery_charging_percentage_limit_anh.state | int  }}       
-  condition:
-  - condition: state
-    entity_id: device_tracker.smartphone_anh
-    state: 'home'
+      {% set at_home = states.device_tracker.smartphone_anh.state == 'home' %}
+      {% set charged_to_minimum = states.sensor.battery_level_anh.state | int+1 >= 60 %}
+      {% set charged_to_limit = states.sensor.battery_level_anh.state | int+1 >= states.input_number.battery_charging_percentage_limit_anh.state | int  %}
+      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_anh.attributes.timestamp | int -(1*3600) %}  
+      {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
+      {{ at_home and (not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up))) }}    
   action:
     service: switch.turn_on
-    entity_id: switch.anh_phone_smart_plug
+    data:
+      entity_id: switch.anh_phone_smart_plug
 #############################################################################
 - id: chambre14
   alias: Lecture média chromecast audio -> allumage enceintes
@@ -685,7 +697,8 @@
     to: 'playing'
   action:
     service: switch.turn_on
-    entity_id: switch.speakers_smart_plug
+    data:
+      entity_id: switch.speakers_smart_plug
 #############################################################################
 - id: chambre15
   alias: Arret lecture média chromecast audio -> extinction enceintes
@@ -699,7 +712,8 @@
     value_template: >
       {{ not is_state('media_player.chambre', 'playing') }}
   - service: switch.turn_off
-    entity_id: switch.speakers_smart_plug
+    data:
+      entity_id: switch.speakers_smart_plug
 #############################################################################
 - id: chambre16
   alias: Lecture média chromecast audio et extinction lumière chambre -> démarrage timer musique
@@ -748,47 +762,20 @@
 - id: chambre18
   alias: Volume musique chambre diminue si lumière éteinte
   trigger:
-    platform: time_pattern
-    seconds: '/6'
+  - entity_id: light.lumiere_chambre
+    platform: state
+    to: 'off'
   condition:
   - condition: state
     entity_id: media_player.chambre
     state: 'playing'
-  - condition: state
-    entity_id: light.lumiere_chambre
-    state: 'off'
 # handle this light going unavailable regularly
   - condition: state
     entity_id: light.lampechevet
-    state: 'off' 
+    state: 'off'
   action:
-  - service: input_number.set_value
-    data_template:
-      entity_id: input_number.speakers_start_volume
-      value: >
-        {% if states.input_number.speakers_start_volume.state | float == 0 %}
-          {{ state_attr("media_player.chambre", "volume_level") | float }}
-        {% else %}
-          {{ states.input_number.speakers_start_volume.state | float }}
-        {% endif %}
-  - service: media_player.volume_set
-    data_template:
-      entity_id: media_player.chambre
-      volume_level: >
-        {% set step = (states.input_number.speakers_start_volume.state | float - states.input_number.speakers_target_volume.state | float/100) / (states.input_number.speakers_volume_change_duration.state | float * 10) %}
-        {% set result = state_attr("media_player.chambre", "volume_level") | float - step %}
-        {% if result < states.input_number.speakers_target_volume.state | float/100 %}
-          {{ states.input_number.speakers_target_volume.state | float/100 }}
-        {% else %}
-          {{ result }}
-        {% endif %}
-  - condition: template
-    value_template: >
-      {{ state_attr("media_player.chambre", "volume_level") | float <=  states.input_number.speakers_target_volume.state | float/100}}
-  - service: input_number.set_value
-    data_template:
-      entity_id: input_number.speakers_start_volume
-      value: 0.0
+    service: script.turn_on
+    entity_id: script.decrease_bedroom_music_volume
 #############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
@@ -997,7 +984,12 @@
       {{ states.light | count == states.light | selectattr('state','eq','off') | list | count }}
   - condition: template
     value_template: >
-      {% set one_minute_before_wake_up = states.input_datetime.morning_routine_date_time.attributes.timestamp | int -(1*60) %} 
+      {% set list_next_wake_up_time =  states.input_datetime.morning_routine_date_time_antoine.attributes.timestamp | int -(1*60), states.input_datetime.morning_routine_date_time_anh.attributes.timestamp | int -(1*60)%}
+      {% if list_next_wake_up_time | min < now().timestamp() | int %}
+      {% set one_minute_before_wake_up = list_next_wake_up_time | max %}
+      {% else %}
+      {% set one_minute_before_wake_up = list_next_wake_up_time | min %}
+      {% endif %}
       {{ one_minute_before_wake_up - as_timestamp(now()) | round(0) == 0}}
   action:
   - service: light.turn_on
@@ -1041,6 +1033,10 @@
     data:
       brightness: 20
       kelvin: 3000
+  # ne continuer que si cet interrupteur est activé
+  - condition: state
+    entity_id: input_boolean.morning_routine_enable_livingroom_kitchen
+    state: 'on'
   - delay: 00:01:00
   - service: light.turn_on
     entity_id: light.AmpouleSalon
@@ -1052,6 +1048,10 @@
     data:
       brightness: 255
       kelvin: 5000
+  # ne continuer que si cet interrupteur est activé
+  - condition: state
+    entity_id: input_boolean.morning_routine_enable_leaving_time_alarm
+    state: 'on'
 # --------------------------------------
 # calculer l'écart en minutes entre l'heure actuelle et l'heure de départ au travail paramétrée. 
 # Si ce temps est suffisamment faible, on est dans le cas d'un jour de travail et on continue sur la routine.
@@ -1110,7 +1110,8 @@
   condition: []
   action:
     service: switch.turn_off
-    entity_id: switch.antoine_phone_smart_plug
+    data:
+      entity_id: switch.antoine_phone_smart_plug
 #############################################################################
 - id: 'routine3'
   alias: Absence Anh -> chargeur off
@@ -1123,7 +1124,8 @@
   condition: []
   action:
     service: switch.turn_off
-    entity_id: switch.anh_phone_smart_plug
+    data:
+      entity_id: switch.anh_phone_smart_plug
 #############################################################################
 - id: 'routine4'
   alias: Retour Antoine -> chargeur on
@@ -1143,7 +1145,8 @@
       {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
   action:
     service: switch.turn_on
-    entity_id: switch.antoine_phone_smart_plug
+    data:
+      entity_id: switch.antoine_phone_smart_plug
 #############################################################################
 - id: 'routine5'
   alias: Retour Anh -> chargeur on
@@ -1163,7 +1166,8 @@
       {{ not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up ) ) }}
   action:
     service: switch.turn_on
-    entity_id: switch.anh_phone_smart_plug
+    data:
+      entity_id: switch.anh_phone_smart_plug
 #############################################################################
 - id: routine6
   alias: Absence appartement -> extinction lumières

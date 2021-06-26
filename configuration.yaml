@@ -1,18 +1,18 @@
 homeassistant:
   # Name of the location where Home Assistant is running
-  name: Home
+#  name: Home
   # Location required to calculate the time the sun rises and sets
-  latitude: 47.2144
-  longitude: -1.5512
+#  latitude: 47.2144
+#  longitude: -1.5512
   # Impacts weather/sunrise data (altitude above sea level in meters)
-  elevation: 0
+#  elevation: 0
   # metric for Metric, imperial for Imperial
-  unit_system: metric
+#  unit_system: metric
   # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-  time_zone: Europe/Paris
+#  time_zone: Europe/Paris
   # Customization file
   customize: !include customize.yaml
-  whitelist_external_dirs:
+  allowlist_external_dirs:
     - /config/Recordings
     - /config/ssl
     - /config/sh
@@ -30,10 +30,17 @@ http:
   use_x_forwarded_for: true
   trusted_proxies: 
    - 127.0.0.1
+   - 192.168.0.101
 
 script: !include scripts.yaml
 group: !include groups.yaml
 automation: !include automations.yaml
+scene: !include scenes.yaml
+
+frontend:
+  themes: !include_dir_merge_named themes
+
+
 
 xiaomi_aqara:
   discovery_retry: 15
@@ -44,22 +51,22 @@ xiaomi_aqara:
 
 yeelight:
   devices:
-    192.168.0.21:
-      name: AmpouleToilettes
-    192.168.0.20:
-      name: AmpouleSalon
-    192.168.0.27:
+#     192.168.0.120:
+#       name: AmpouleSalleDeBain
+    192.168.0.121:
       name: AmpouleBureau
-    192.168.0.28:
-      name: AmpouleChambre
-    192.168.0.29:
-      name: LampeChevet
-    192.168.0.23:
-      name: AmpouleSalleDeBain
-    192.168.0.24:
-      name: AmpouleCuisine
-    192.168.0.25:
-      name: AmpouleCouloir
+#     192.168.0.122:
+#       name: AmpouleToilettes
+#     192.168.0.123:
+#       name: AmpouleSalon
+#     192.168.0.124:
+#       name: AmpouleCouloir
+#     192.168.0.125:
+#       name: AmpouleCuisine
+#     192.168.0.126:
+#       name: AmpouleChambre
+#     192.168.0.127:
+#       name: LampeChevet
 
 light:
   - platform: group
@@ -85,20 +92,14 @@ light:
       - light.bathroom_bulb_2_rgb
 
 sensor:
-  - platform: file
-    name: Activité hdd
-    file_path: /config/sh/hddspinsensor.txt
+  # - platform: file
+  #   name: Activité hdd
+  #   file_path: /config/sh/hddspinsensor.txt
   - platform: command_line
     name: Température CPU
     command: "cat /sys/class/thermal/thermal_zone0/temp"
     unit_of_measurement: "°C"
     value_template: '{{ value | multiply(0.001) | round(1) }}'
-  # Weather prediction
-  - platform: yr
-    name: Weather
-    monitored_conditions:
-      - temperature
-      - symbol
   - platform: systemmonitor
     resources:
     - type: disk_use_percent
@@ -159,6 +160,11 @@ sensor:
           {% else %}
             0
           {% endif %}
+      weather_nantes_temperature:
+        friendly_name: "Température Nantes"
+        unit_of_measurement: '°C'
+        value_template: >
+          {{ state_attr('weather.nantes', 'temperature') }}
   - platform: derivative
     source: sensor.battery_level_anh
     round: 1
@@ -185,13 +191,13 @@ sensor:
             0
           {% endif %}
   - platform: statistics
-    entity_id: sensor.battery_derivative_negative_antoine
     name: battery_derivative_negative_antoine_statistics
-    sampling_size: 4
+    entity_id: sensor.battery_derivative_negative_antoine
+    sampling_size: 6
     max_age:
-      minutes: 45
+      minutes: 90
   - platform: rest
-    resource: http://192.168.0.33:61208/api/3/network/interface_name/enp1s0
+    resource: http://192.168.0.101:61208/api/3/network/interface_name/enp1s0
     name: network_powerhouse
     headers:
       Accept-Encoding: ''
@@ -209,6 +215,20 @@ sensor:
       upload_powerhouse:
         value_template: '{{ states.sensor.network_powerhouse.attributes["tx"] | multiply(0.000000954/8) | multiply(0.16666) | round(2) }}'
         unit_of_measurement: Mo/s
+  - platform: history_stats
+    name: time_on_smartphone_screen_antoine
+    entity_id: input_boolean.smartphone_screen_antoine
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=4, minute=0, second=0) }}"
+    end: "{{ now() }}"
+  - platform: history_stats
+    name: time_on_smartphone_screen_anh
+    entity_id: input_boolean.smartphone_screen_anh
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=4, minute=0, second=0) }}"
+    end: "{{ now() }}"      
 
 utility_meter:
   monthly_tv_power_usage:
@@ -289,7 +309,7 @@ timer:
 wake_on_lan:
 
 webostv:
-  host: 192.168.0.35
+  host: 192.168.0.20
   name: LG_OLED55B7
   turn_on_action:
     service: wake_on_lan.send_magic_packet
@@ -309,7 +329,7 @@ webostv:
 
 notify:
   - platform: webostv
-    host: 192.168.0.26
+    host: 192.168.0.10
     name: LG_OLED55B7
   - platform: html5
     name: Antoine_notification
@@ -340,9 +360,10 @@ notify:
 
 device_tracker:
   - platform: nmap_tracker
-    hosts: 192.168.0.1/24
+    hosts: 192.168.0.254/24
     home_interval: 15
 #    consider_home: 0:03:00
+    scan_options: "-F –host-timeout 15s"
     exclude:
       - 192.168.0.44
 

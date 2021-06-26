@@ -58,7 +58,7 @@ turn_on_kitchen:
   alias: Allumer cuisine
   sequence:
   - service: light.turn_on
-    entity_id: light.AmpouleCuisine, light.bar_led_strip
+    entity_id: light.AmpouleCuisine
     data_template:
       brightness: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -72,6 +72,8 @@ turn_on_kitchen:
         {% else %}
           5000
         {% endif %}
+  - service: script.turn_on
+    entity_id: script.turn_on_bar_led_strip
 turn_on_kitchen_weak:
   alias: Allumer cuisine (doux)
   sequence:
@@ -85,16 +87,8 @@ turn_on_kitchen_weak:
           50
         {% endif %}
       kelvin: 2500
-  - service: light.turn_on
-    entity_id: light.bar_led_strip
-    data_template:
-      brightness: 100
-      kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
-          2500
-        {% else %}
-          3500
-        {% endif %}
+  - service: script.turn_on
+    entity_id: script.turn_on_bar_led_strip_weak
   - service: light.turn_on
     entity_id: light.gateway
     data_template:
@@ -120,23 +114,7 @@ turn_on_livingroom:
   alias: Allumer salon
   sequence:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon, light.livingroom_led_strip
-    data_template:
-      brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
-          100
-        {% else %}
-          255
-        {% endif %}
-      kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
-          3000
-        {% else %}
-          5000
-        {% endif %}  
-  - delay: 00:00:01
-  - service: light.turn_on
-    entity_id: light.bar_led_strip
+    entity_id: light.AmpouleSalon
     data_template:
       brightness: >
         {% if now().hour >= 22 or now().hour < 09 %}
@@ -150,14 +128,20 @@ turn_on_livingroom:
         {% else %}
           5000
         {% endif %}
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_led_strip, script.turn_on_bar_led_strip
 turn_on_livingroom_weak:
   alias: Allumer salon (doux)
   sequence:
   - service: light.turn_on
-    entity_id: light.AmpouleSalon, light.livingroom_led_strip, light.bar_led_strip
+    entity_id: light.AmpouleSalon
     data_template:
       brightness: 50
       kelvin: 3000
+  - service: script.turn_on
+    entity_id: 
+  - service: script.turn_on
+    entity_id: script.turn_on_bar_led_strip_weak, script.turn_on_livingroom_led_strip_weak
 turn_off_livingroom:
   alias: Eteindre salon
   sequence:
@@ -419,4 +403,117 @@ m365_limit_charge:
           {% endif %}
     - wait_template: "{{ states.timer.m365_charge_timer.state == 'idle' }}"
     - service: switch.turn_off
-      entity_id: switch.m365_plug
+      data:
+        entity_id: switch.m365_plug
+
+turn_on_livingroom_led_strip:
+  alias: Allumer led salon
+  sequence:
+    - service: light.turn_on
+      entity_id: light.livingroom_led_strip
+      data_template:
+        brightness: >
+          {% if now().hour >= 22 or now().hour < 09 %}
+            100
+          {% else %}
+            255
+          {% endif %}
+    - delay: 
+        milliseconds: 200
+    - service: light.turn_on
+      entity_id: light.livingroom_led_strip
+      data_template:
+        kelvin: >
+          {% if now().hour >= 22 or now().hour < 09 %}
+            3000
+          {% else %}
+            5000
+          {% endif %}
+
+turn_on_livingroom_led_strip_weak:
+  alias: Allumer led salon doux
+  sequence:
+    - service: light.turn_on
+      entity_id: light.livingroom_led_strip
+      data_template:
+        brightness: 50        
+    - delay: 
+        milliseconds: 200
+    - service: light.turn_on
+      entity_id: light.livingroom_led_strip
+      data_template:
+        kelvin: >
+          {% if now().hour >= 22 or now().hour < 09 %}
+            2500
+          {% else %}
+            3000
+          {% endif %}
+
+turn_on_bar_led_strip:
+  alias: Allumer led bar
+  sequence:
+    - service: light.turn_on
+      entity_id: light.bar_led_strip
+      data_template:
+        brightness: >
+          {% if now().hour >= 22 or now().hour < 09 %}
+            100
+          {% else %}
+            255
+          {% endif %}
+    - delay: 
+        milliseconds: 200
+    - service: light.turn_on
+      entity_id: light.bar_led_strip
+      data_template:
+        kelvin: >
+          {% if now().hour >= 22 or now().hour < 09 %}
+            3000
+          {% else %}
+            5000
+          {% endif %}
+
+turn_on_bar_led_strip_weak:
+  alias: Allumer led bar doux
+  sequence:
+    - service: light.turn_on
+      entity_id: light.bar_led_strip
+      data_template:
+        brightness: 50        
+    - delay: 
+        milliseconds: 200
+    - service: light.turn_on
+      entity_id: light.bar_led_strip
+      data_template:
+        kelvin: >
+          {% if now().hour >= 22 or now().hour < 09 %}
+            2500
+          {% else %}
+            3000
+          {% endif %}
+
+decrease_bedroom_music_volume:
+  alias: baisser lentement son musique chambre
+  sequence:
+    - service: input_number.set_value
+      entity_id: input_number.speakers_start_volume
+      data_template:
+        value: >        
+          {{ state_attr("media_player.chambre", "volume_level") | float }}      
+    - repeat:
+        while:
+          - condition: template
+            value_template: '{{ state_attr("media_player.chambre", "volume_level") | float > states.input_number.speakers_target_volume.state | float / 100}}'
+        sequence:
+          - service: media_player.volume_set
+            data_template:
+              entity_id: media_player.chambre
+              volume_level: >
+                {% set step = (states.input_number.speakers_start_volume.state | float - states.input_number.speakers_target_volume.state | float/100) / (states.input_number.speakers_volume_change_duration.state | float * 10) %}
+                {% set result = state_attr("media_player.chambre", "volume_level") | float - step %}
+                {% if result < (states.input_number.speakers_target_volume.state | float / 100) %}
+                  {{ states.input_number.speakers_target_volume.state | float / 100 }}
+                {% else %}
+                  {{ result }}
+                {% endif %}
+          - delay: 00:00:06

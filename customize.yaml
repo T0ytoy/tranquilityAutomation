@@ -44,3 +44,8 @@ sensor.monthly_tv_power_usage:
   unit_of_measurement: kWh
 script.m365_limit_charge:
   icon: mdi:scooter
+sensor.m365_power:
+  device_class: power
+  unit_of_measurement: W
+sensor.battery_derivative_negative_antoine_statistics:
+  friendly_name: Batterie Antoine
