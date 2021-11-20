@@ -40,7 +40,10 @@ scene: !include scenes.yaml
 frontend:
   themes: !include_dir_merge_named themes
 
-
+recorder:
+  # db_url: postgresql://hass:mvtmjsun42@127.0.0.1/hass
+  db_url: postgresql://hass:mvtmjsun42@192.168.0.101:5433/hass
+  commit_interval: 5
 
 xiaomi_aqara:
   discovery_retry: 15
@@ -104,8 +107,8 @@ sensor:
     resources:
     - type: disk_use_percent
       arg: /
-    - type: disk_use_percent
-      arg: /mnt/hdd
+#    - type: disk_use_percent
+#      arg: /mnt/hdd
     - type: memory_use_percent
     - type: processor_use
     - type: last_boot
@@ -125,6 +128,12 @@ sensor:
     source: sensor.livingroom_multimedia_power_usage
     name: livingroom_multimedia_energy_spent
     unit_prefix: k
+    round: 2
+  - platform: integration
+    source: sensor.heating_blanket_power_usage
+    name: heating_blanket_energy_spent
+    unit_prefix: k
+    method: left
     round: 2
   - platform: time_date
     display_options:
@@ -193,7 +202,7 @@ sensor:
   - platform: statistics
     name: battery_derivative_negative_antoine_statistics
     entity_id: sensor.battery_derivative_negative_antoine
-    sampling_size: 6
+    sampling_size: 4
     max_age:
       minutes: 90
   - platform: rest
@@ -207,6 +216,45 @@ sensor:
       - tx
       - rx
     scan_interval: 45
+  - platform: rest
+    resource: https://mabbox.bytel.fr/api/v1/wan/ip/stats
+    name: bbox_network_rx
+    headers:
+      Accept-Encoding: ''
+    value_template: 'interface: bbox'
+    json_attributes_path: "$.[0].wan.ip.stats.rx"
+    json_attributes: 
+      - occupation
+      - bytes
+    scan_interval: 12
+  - platform: rest
+    resource: https://mabbox.bytel.fr/api/v1/wan/ip/stats
+    name: bbox_network_tx
+    headers:
+      Accept-Encoding: ''
+    value_template: 'interface: bbox'
+    json_attributes_path: "$.[0].wan.ip.stats.tx"
+    json_attributes: 
+      - occupation
+      - bytes
+    scan_interval: 12
+  # - platform: rest
+  #   resource: https://mabbox.bytel.fr/api/v1/wan/ip/stats
+  #   sensor: 
+  #     - name: bbox_network_rx
+  #       value_template: 'bbox network'    
+  #       json_attributes_path: "$.[0].wan.ip.stats.rx"
+  #       json_attributes: 
+  #         - occupation
+  #         - bytes
+  #       scan_interval: 12
+  #     - name: bbox_network_tx
+  #       value_template: 'bbox network'    
+  #       json_attributes_path: "$.[0].wan.ip.stats.tx"
+  #       json_attributes: 
+  #         - occupation
+  #         - bytes
+  #       scan_interval: 12
   - platform: template
     sensors:
       download_powerhouse:
@@ -215,6 +263,30 @@ sensor:
       upload_powerhouse:
         value_template: '{{ states.sensor.network_powerhouse.attributes["tx"] | multiply(0.000000954/8) | multiply(0.16666) | round(2) }}'
         unit_of_measurement: Mo/s
+      download_bbox:
+        value_template: >
+          {% set rxSpeed = states.sensor.bbox_network_rx.attributes["occupation"] | multiply(0.125) | round(2) %}
+          {% if rxSpeed != 125 %}
+            {{ rxSpeed }}
+          {% else %}
+            {{ 0 }}
+          {% endif %}
+        unit_of_measurement: Mo/s
+      total_download_bbox:
+        value_template: '{{ states.sensor.bbox_network_rx.attributes["bytes"] | multiply(0.000000954) | round(2) }}'
+        unit_of_measurement: Mo
+      upload_bbox:
+        value_template: >
+          {% set rxSpeed = states.sensor.bbox_network_tx.attributes["occupation"] | multiply(0.125) | round(2) %}
+          {% if rxSpeed != 125 %}
+            {{ rxSpeed }}
+          {% else %}
+            {{ 0 }}
+          {% endif %}
+        unit_of_measurement: Mo/s
+      total_upload_bbox:
+        value_template: '{{ states.sensor.bbox_network_tx.attributes["bytes"] | multiply(0.000001) | round(2) }}'
+        unit_of_measurement: Mo
   - platform: history_stats
     name: time_on_smartphone_screen_antoine
     entity_id: input_boolean.smartphone_screen_antoine
@@ -239,6 +311,15 @@ utility_meter:
     cycle: monthly
   monthly_m365_power_usage:
     source: sensor.m365_energy_spent
+    cycle: monthly
+  monthly_heating_blanket_power_usage:
+    source: sensor.heating_blanket_energy_spent
+    cycle: monthly
+  monthly_total_download_bbox:
+    source: sensor.total_download_bbox
+    cycle: monthly
+  monthly_total_upload_bbox:
+    source: sensor.total_upload_bbox
     cycle: monthly
 
 input_datetime:
@@ -271,7 +352,7 @@ input_number:
   speakers_turnoff_timer:
     name: Délai extinction enceintes
     unit_of_measurement: "minutes"
-    initial: 45
+    initial: 60
     min: 0
     max: 240
     step: 5
@@ -279,7 +360,7 @@ input_number:
   speakers_target_volume:
     name: Vol. cible
     unit_of_measurement: "%"
-    initial: 6
+    initial: 3
     min: 0
     max: 100
     step: 1

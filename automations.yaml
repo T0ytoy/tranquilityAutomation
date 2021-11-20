@@ -7,9 +7,14 @@
       entity_id: binary_sensor.wall_livingroom_left
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.AmpouleSalon
-    state: 'off'
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: light.AmpouleSalon
+      state: 'off'
+    - condition: state
+      entity_id: light.livingroom_led_strip
+      state: 'off'
   action:
   - service: script.turn_on
     entity_id: script.turn_on_livingroom
@@ -36,9 +41,22 @@
       entity_id: binary_sensor.wall_livingroom_left
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.AmpouleSalon
-    state: 'on'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.AmpouleSalon
+      state: 'on'
+    - condition: state
+      entity_id: light.livingroom_led_strip
+      state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: light.bar_led_strip
+        state: 'on'
+      - condition: state
+        entity_id: light.AmpouleCuisine
+        state: 'off'
   action:
   - service: script.turn_on
     entity_id: script.turn_off_livingroom
@@ -107,7 +125,7 @@
       entity_id: script.turn_on_desk
 #############################################################################
 - id: salon8
-  alias: IM salon (CD) et salon on -> amp. salon & salon off
+  alias: IM salon (CD) et salon on -> amp. salon & bureau off
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
@@ -140,17 +158,26 @@
     entity_id: script.turn_on_desk_weak
 #############################################################################
 - id: salon10
-  alias: IP salon (CS) -> amp. salon on /off
+  alias: IP salon (CS) et amp. salon off -> amp. salon on
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
     event_data:
       entity_id: binary_sensor.portable_livingroom
       click_type: single
-  condition: []
+  condition:
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: light.Lumiere_Salon
+      state: 'off'
   action:
-  - service: light.toggle
-    entity_id: light.Lumiere_Salon
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_led_strip
+  - service: script.turn_on
+    entity_id: script.turn_on_desk
 #############################################################################
 - id: salon11
   alias: IP salon (CL) -> amp. salon faible
@@ -162,27 +189,40 @@
       click_type: long_click_press
   condition: []
   action:
-  - service: light.turn_on
-    entity_id: light.Lumiere_Salon
-    data_template:
-      brightness: 125
-      kelvin: 3300
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_weak
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom_led_strip_weak
+  - service: script.turn_on
+    entity_id: script.turn_on_desk_weak
 #############################################################################
 - id: salon12
-  alias: IP salon (CD) -> amp. salon forte
+  alias: IP salon et amp. salon on -> amp. salon off
   trigger:
     platform: event
     event_type: xiaomi_aqara.click
     event_data:
       entity_id: binary_sensor.portable_livingroom
-      click_type: double
-  condition: []
+      click_type: single
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.Lumiere_Salon
+      state: 'on'
+    - condition: and
+      conditions:
+      - condition: state
+        entity_id: light.bar_led_strip
+        state: 'on'
+      - condition: state
+        entity_id: light.AmpouleCuisine
+        state: 'off'
   action:
-  - service: light.turn_on
-    entity_id: light.Lumiere_Salon
-    data:
-      brightness: 255
-      kelvin: 4500
+  - service: script.turn_on
+    entity_id: script.turn_off_livingroom
+  - service: script.turn_on
+    entity_id: script.turn_off_desk
 #############################################################################
 - id: salon13
   alias: TV éteinte & lumières éteintes -> gateway jusqu'à allumage lumière
@@ -207,10 +247,10 @@
       rgb_color: [255, 120, 19]
       brightness: 255
   - service: light.turn_on
-    entity_id: light.livingroom_led_trip, light.bar_led_strip
+    entity_id: light.livingroom_led_strip, light.bar_led_strip
     data:
       kelvin: 3000
-      brightness: 100
+      brightness: 75
   - wait_template: >
       {{ is_state('light.AmpouleSalon', 'on') 
         or is_state('light.AmpouleCuisine', 'on') 
@@ -218,7 +258,7 @@
         or states.media_player.lg_oled.attributes.entity_picture != null
       }}
   - service: light.turn_off
-    entity_id: light.gateway, light.bar_led_strip
+    entity_id: light.gateway, light.livingroom_led_strip, light.bar_led_strip
 #############################################################################
 - id: salon14
   alias: Température < 18°C -> notification
@@ -366,9 +406,14 @@
       entity_id: binary_sensor.wall_kitchen_right
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.Lumiere_Salon
-    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.Lumiere_Salon
+      state: 'off'
+    - condition: state
+      entity_id: light.livingroom_led_strip
+      state: 'off'
   action:
   - service: script.turn_on
     entity_id: script.turn_on_livingroom
@@ -399,9 +444,14 @@
       entity_id: binary_sensor.wall_kitchen_right
       click_type: single
   condition:
-  - condition: state
-    entity_id: light.Lumiere_Salon
-    state: 'on'
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: light.Lumiere_Salon
+      state: 'on'
+    - condition: state
+      entity_id: light.livingroom_led_strip
+      state: 'on'
   action:
   - service: script.turn_on
     entity_id: script.turn_off_livingroom
@@ -417,9 +467,20 @@
       entity_id: binary_sensor.wall_kitchen_both
       click_type: both
   condition:
-  - condition: state
-    entity_id: light.AmpouleCuisine
-    state: 'off'
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: light.AmpouleCuisine
+      state: 'off'
+    - condition: state
+      entity_id: light.Lumiere_Salon
+      state: 'off'
+    - condition: state
+      entity_id: light.livingroom_led_strip
+      state: 'off'
+    - condition: state
+      entity_id: light.bar_led_strip
+      state: 'off'
   action:
     - service: script.turn_on
       entity_id: script.turn_on_kitchen
@@ -435,9 +496,20 @@
       entity_id: binary_sensor.wall_kitchen_both
       click_type: both
   condition:
-  - condition: state
-    entity_id: light.AmpouleCuisine
-    state: 'on'
+  - condition: and
+    conditions:
+    - condition: state
+      entity_id: light.AmpouleCuisine
+      state: 'on'
+    - condition: state
+      entity_id: light.Lumiere_Salon
+      state: 'on'
+    - condition: state
+      entity_id: light.livingroom_led_strip
+      state: 'on'
+    - condition: state
+      entity_id: light.bar_led_strip
+      state: 'on'
   action:
     - service: script.turn_on
       entity_id: script.turn_off_kitchen
@@ -458,6 +530,18 @@
     entity_id: script.turn_on_kitchen_weak
   - service: script.turn_on
     entity_id: script.turn_on_livingroom_weak
+#############################################################################
+- id: cuisine10
+  alias: Fin cycle machine à laver -> notification passerelle
+  trigger:
+    platform: state
+    entity_id: sensor.lave_linge_washer_job_state
+    to: 'finish'
+  action:
+  - service: script.turn_on
+    entity_id: script.gateway_notification_washing_machine_cycle_finished
+  - service: script.turn_on
+    entity_id: script.gateway_notification_washing_machine_cycle_finished_killer
 #############################################################################
 - id: chambre1
   alias: IM chambre (CS) et amp. chambre off -> Chambre on
@@ -629,7 +713,7 @@
       {% set at_home = states.device_tracker.smartphone_antoine.state == 'home' %}
       {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int-1 > 60 %}
       {% set charged_to_limit = states.sensor.battery_level_antoine.state | int-1 > states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
-      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set daytime = (now().hour >= 10 and now().hour <=22) %}
       {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_antoine.attributes.timestamp | int -(1*3600) %} 
       {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
       {{ not at_home or (charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up)) }}
@@ -646,7 +730,7 @@
       {% set at_home = states.device_tracker.smartphone_antoine.state == 'home' %}
       {% set charged_to_minimum = states.sensor.battery_level_antoine.state | int+1 >= 60 %}
       {% set charged_to_limit = states.sensor.battery_level_antoine.state | int+1 >= states.input_number.battery_charging_percentage_limit_antoine.state | int  %}
-      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set daytime = (now().hour >= 10 and now().hour <=22) %}
       {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_antoine.attributes.timestamp | int -(1*3600) %}  
       {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
       {{ at_home and (not charged_to_minimum or (not charged_to_limit and ( daytime or currently_one_hour_before_wake_up))) }}
@@ -663,7 +747,7 @@
       {% set at_home = states.device_tracker.smartphone_anh.state == 'home' %}
       {% set charged_to_minimum = states.sensor.battery_level_anh.state | int-1 > 60 %}
       {% set charged_to_limit = states.sensor.battery_level_anh.state | int-1 > states.input_number.battery_charging_percentage_limit_anh.state | int  %}
-      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set daytime = (now().hour >= 10 and now().hour <=22) %}
       {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_anh.attributes.timestamp | int -(1*3600) %} 
       {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
       {{ not at_home or (charged_to_limit or (charged_to_minimum and not daytime and not currently_one_hour_before_wake_up)) }}
@@ -680,7 +764,7 @@
       {% set at_home = states.device_tracker.smartphone_anh.state == 'home' %}
       {% set charged_to_minimum = states.sensor.battery_level_anh.state | int+1 >= 60 %}
       {% set charged_to_limit = states.sensor.battery_level_anh.state | int+1 >= states.input_number.battery_charging_percentage_limit_anh.state | int  %}
-      {% set daytime = (now().hour >= 11 and now().hour <=22) %}
+      {% set daytime = (now().hour >= 10 and now().hour <=22) %}
       {% set one_hour_before_wake_up = states.input_datetime.morning_routine_date_time_anh.attributes.timestamp | int -(1*3600) %}  
       {% set currently_one_hour_before_wake_up = as_timestamp(now()) >= one_hour_before_wake_up %}
       {{ at_home and (not charged_to_minimum or ( not charged_to_limit and ( daytime or currently_one_hour_before_wake_up))) }}    
@@ -707,7 +791,7 @@
     platform: state
     from: 'playing'
   action:
-  - delay: 00:00:05
+  - delay: 00:00:20
   - condition: template
     value_template: >
       {{ not is_state('media_player.chambre', 'playing') }}
@@ -776,6 +860,58 @@
   action:
     service: script.turn_on
     entity_id: script.decrease_bedroom_music_volume
+#############################################################################
+- id: chambre19
+  alias: 20 minutes avant réveil + chambre froide -> allumage plaid chauffant
+  trigger:
+    platform: time_pattern
+    minutes: '/1'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.temperature_bedroom
+    below: 21
+  - condition: template
+    value_template: >
+      {% set list_next_wake_up_time =  states.input_datetime.morning_routine_date_time_antoine.attributes.timestamp | int -(20*60), states.input_datetime.morning_routine_date_time_anh.attributes.timestamp | int -(20*60) %}
+      {% if list_next_wake_up_time | min < now().timestamp() | int %}
+      {% set twenty_minute_before_wake_up = list_next_wake_up_time | max %}
+      {% else %}
+      {% set twenty_minute_before_wake_up = list_next_wake_up_time | min %}
+      {% endif %}
+      {{ twenty_minute_before_wake_up - as_timestamp(now()) | round(0) == 0}}
+  action:
+  - service: script.turn_on
+    entity_id: script.heating_blanket_limit_duration
+#############################################################################
+- id: chambre20
+  alias: présence chambre + chambre froide -> allumage plaid chauffant
+  trigger:
+    platform: state
+    entity_id: light.lampechevet
+    from: 'off'
+    to: 'on'
+    for: '00:05:00'
+  condition:
+  - condition: numeric_state
+    entity_id: sensor.temperature_bedroom
+    below: 21
+  action:
+  - service: script.turn_on
+    entity_id: script.heating_blanket_limit_duration
+#############################################################################
+- id: chambre21
+  alias: script plaid chauffant annulé -> extinction plaid chauffant
+  trigger:
+    platform: state
+    entity_id: script.heating_blanket_limit_duration
+    from: 'on'
+    to: 'off'
+  condition:
+  action:
+  - service: switch.turn_off
+    entity_id: switch.heating_blanket_on_off
+  - service: timer.cancel
+    entity_id: timer.heating_blanket
 #############################################################################
 - id: couloir1
   alias: Détecteur mouv. couloir on -> amp. couloir on
@@ -1038,16 +1174,10 @@
     entity_id: input_boolean.morning_routine_enable_livingroom_kitchen
     state: 'on'
   - delay: 00:01:00
-  - service: light.turn_on
-    entity_id: light.AmpouleSalon
-    data:
-      brightness: 255
-      kelvin: 5000
-  - service: light.turn_on
-    entity_id: light.AmpouleCuisine
-    data:
-      brightness: 255
-      kelvin: 5000
+  - service: script.turn_on
+    entity_id: script.turn_on_livingroom
+  - service: script.turn_on
+    entity_id: script.turn_on_kitchen
   # ne continuer que si cet interrupteur est activé
   - condition: state
     entity_id: input_boolean.morning_routine_enable_leaving_time_alarm

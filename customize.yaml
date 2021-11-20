@@ -49,3 +49,8 @@ sensor.m365_power:
   unit_of_measurement: W
 sensor.battery_derivative_negative_antoine_statistics:
   friendly_name: Batterie Antoine
+media_player.ytube_music_player:
+  friendly_name: Youtube Music
+script.heating_blanket_limit_duration:
+  friendly_name: Allumer plaid chauffant
+  icon: hass:radiator

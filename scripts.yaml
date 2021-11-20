@@ -5,13 +5,13 @@ turn_on_bedroom:
     entity_id: light.AmpouleChambre
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           80
         {% else %}
           150
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           2500
         {% else %}
           4000
@@ -33,13 +33,13 @@ turn_on_bedroom_strong:
     entity_id: light.AmpouleChambre
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           150
         {% else %}
           255
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           4000
         {% else %}
           5000
@@ -61,13 +61,13 @@ turn_on_kitchen:
     entity_id: light.AmpouleCuisine
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           100
         {% else %}
           255
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3000
         {% else %}
           5000
@@ -81,7 +81,7 @@ turn_on_kitchen_weak:
     entity_id: light.AmpouleCuisine
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           0
         {% else %}
           50
@@ -94,7 +94,7 @@ turn_on_kitchen_weak:
     data_template:
       rgb_color: [255, 120, 19]
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           255
         {% else %}
           0
@@ -107,6 +107,8 @@ turn_off_kitchen:
   - condition: state
     entity_id: light.lumiere_salon
     state: 'off'
+  - delay: 
+      milliseconds: 200
   - service: light.turn_off
     entity_id: light.bar_led_strip
 
@@ -117,17 +119,19 @@ turn_on_livingroom:
     entity_id: light.AmpouleSalon
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           100
         {% else %}
           255
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3000
         {% else %}
           5000
         {% endif %}
+  - delay: 
+      milliseconds: 500
   - service: script.turn_on
     entity_id: script.turn_on_livingroom_led_strip, script.turn_on_bar_led_strip
 turn_on_livingroom_weak:
@@ -138,8 +142,8 @@ turn_on_livingroom_weak:
     data_template:
       brightness: 50
       kelvin: 3000
-  - service: script.turn_on
-    entity_id: 
+  - delay: 
+      milliseconds: 500
   - service: script.turn_on
     entity_id: script.turn_on_bar_led_strip_weak, script.turn_on_livingroom_led_strip_weak
 turn_off_livingroom:
@@ -150,6 +154,8 @@ turn_off_livingroom:
   - condition: state
     entity_id: light.AmpouleCuisine
     state: 'off'
+  - delay: 
+      milliseconds: 200
   - service: light.turn_off
     entity_id: light.bar_led_strip
 
@@ -160,13 +166,13 @@ turn_on_desk:
     entity_id: light.AmpouleBureau
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           100
         {% else %}
           255
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3000
         {% else %}
           4500
@@ -192,13 +198,13 @@ turn_on_bathroom:
     entity_id: light.AmpouleSalleDeBain
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           80
         {% else %}
           150
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           2500
         {% else %}
           4000
@@ -208,7 +214,7 @@ turn_on_bathroom:
     data_template:
       brightness: 70
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3000
         {% else %}
           4500
@@ -220,13 +226,13 @@ turn_on_bathroom_weak:
     entity_id: light.AmpouleSalleDeBain
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           10
         {% else %}
           40
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           2500
         {% else %}
           4000
@@ -235,7 +241,7 @@ turn_on_bathroom_weak:
     entity_id: light.lumiere_miroir_salle_de_bain
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           50
         {% else %}
           70
@@ -249,7 +255,7 @@ turn_on_bathroom_strong:
     data_template:
       brightness: 255
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3500
         {% else %}
           3800
@@ -259,7 +265,7 @@ turn_on_bathroom_strong:
     data_template:
       brightness: 200
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3500 
         {% else %}
           6000
@@ -280,13 +286,13 @@ turn_on_toilets:
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           80
         {% else %}
           150
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           2500
         {% else %}
           4000
@@ -298,13 +304,13 @@ turn_on_toilets_weak:
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           1
         {% else %}
           30
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           2500
         {% else %}
           4000
@@ -316,13 +322,13 @@ turn_on_toilets_strong:
     entity_id: light.AmpouleToilettes
     data_template:
       brightness: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           150
         {% else %}
           255
         {% endif %}
       kelvin: >
-        {% if now().hour >= 22 or now().hour < 09 %}
+        {% if now().hour >= 22 or now().hour < 9 %}
           3500
         {% else %}
           4500
@@ -392,14 +398,26 @@ m365_limit_charge:
       entity_id: timer.m365_charge_timer
       data_template:
         duration: >
-          {% if states.sensor.m365_power_usage.state | int == 72 %}
-            01:10:00
-          {% elif states.sensor.m365_power_usage.state | int == 73 %}
-            01:00:00
-          {% elif states.sensor.m365_power_usage.state | int == 74 %}
-            00:40:00
+          {% if states.sensor.m365_power_usage.state | int > 142 %}
+            {% if states.sensor.m365_power_usage.state | int > 148 %}
+              00:00:01
+            {% elif states.sensor.m365_power_usage.state | int > 146 %}
+              00:40:00
+            {% elif states.sensor.m365_power_usage.state | int > 142 %}
+              01:00:00
+            {% else %}
+              01:10:00
+            {% endif %}
           {% else %}
-            00:00:01
+            {% if states.sensor.m365_power_usage.state | int == 72 %}
+              01:25:00
+            {% elif states.sensor.m365_power_usage.state | int == 73 %}
+              01:15:00
+            {% elif states.sensor.m365_power_usage.state | int == 74 %}
+              00:55:00
+            {% else %}
+              00:00:01
+            {% endif %}
           {% endif %}
     - wait_template: "{{ states.timer.m365_charge_timer.state == 'idle' }}"
     - service: switch.turn_off
@@ -413,18 +431,18 @@ turn_on_livingroom_led_strip:
       entity_id: light.livingroom_led_strip
       data_template:
         brightness: >
-          {% if now().hour >= 22 or now().hour < 09 %}
+          {% if now().hour >= 22 or now().hour < 9 %}
             100
           {% else %}
             255
           {% endif %}
     - delay: 
-        milliseconds: 200
+        milliseconds: 500
     - service: light.turn_on
       entity_id: light.livingroom_led_strip
       data_template:
         kelvin: >
-          {% if now().hour >= 22 or now().hour < 09 %}
+          {% if now().hour >= 22 or now().hour < 9 %}
             3000
           {% else %}
             5000
@@ -443,7 +461,7 @@ turn_on_livingroom_led_strip_weak:
       entity_id: light.livingroom_led_strip
       data_template:
         kelvin: >
-          {% if now().hour >= 22 or now().hour < 09 %}
+          {% if now().hour >= 22 or now().hour < 9 %}
             2500
           {% else %}
             3000
@@ -456,7 +474,7 @@ turn_on_bar_led_strip:
       entity_id: light.bar_led_strip
       data_template:
         brightness: >
-          {% if now().hour >= 22 or now().hour < 09 %}
+          {% if now().hour >= 22 or now().hour < 9 %}
             100
           {% else %}
             255
@@ -467,7 +485,7 @@ turn_on_bar_led_strip:
       entity_id: light.bar_led_strip
       data_template:
         kelvin: >
-          {% if now().hour >= 22 or now().hour < 09 %}
+          {% if now().hour >= 22 or now().hour < 9 %}
             3000
           {% else %}
             5000
@@ -486,7 +504,7 @@ turn_on_bar_led_strip_weak:
       entity_id: light.bar_led_strip
       data_template:
         kelvin: >
-          {% if now().hour >= 22 or now().hour < 09 %}
+          {% if now().hour >= 22 or now().hour < 9 %}
             2500
           {% else %}
             3000
@@ -517,3 +535,96 @@ decrease_bedroom_music_volume:
                   {{ result }}
                 {% endif %}
           - delay: 00:00:06
+
+gateway_notification_washing_machine_cycle_finished:
+  alias: notification fin de cycle machine à laver
+  sequence:
+    - repeat:
+        sequence:
+          - service: light.turn_on
+            entity_id: light.gateway
+            data:
+              rgb_color: [36,200,255]
+              brightness_pct: 12
+          - delay: 00:00:02
+          - service: light.turn_on
+            entity_id: light.gateway
+            data:
+              rgb_color: [0,63,255]
+              brightness_pct: 35
+          - delay: 00:00:00.750
+        until:
+          - condition: state
+            entity_id: light.gateway
+            state: 'off'
+
+gateway_notification_washing_machine_cycle_finished_killer:
+  alias: arrêt notification fin de cycle machine à laver
+  sequence:
+    - wait_for_trigger:
+      - platform: state
+        entity_id: light.gateway
+        to: "off"
+    - service: script.turn_off
+      entity_id: script.gateway_notification_washing_machine_cycle_finished
+    - service: light.turn_off
+      entity_id: light.gateway
+
+toggle_litter_tray_sleep_mode:
+  alias: Activer / désactiver mode silencieux litière
+  sequence:
+    - service: litterrobot.set_sleep_mode
+      target:
+        entity_id: vacuum.vaisseau_mere_litter_box
+      data_template:
+        enabled: >
+          {{ not state_attr('vacuum.vaisseau_mere_litter_box', 'sleep_mode_enabled') }}
+        start_time: >
+          {{ states("input_datetime.litter_box_sleep_mode_time") }}
+
+update_litter_tray_cleaning_wait_time:
+  alias: Paramétrer durée temporisation nettoyage litière
+  sequence:
+    - service: litterrobot.set_wait_time
+      target:
+        entity_id: vacuum.vaisseau_mere_litter_box
+      data_template:
+        minutes: >
+          {{ states("input_select.duree_temporisation_nettoyage_litere") }}
+
+search_youtube_playlist:
+  alias: Rechercher Playlist Youtube
+  sequence:
+  - service: ytube_music_player.search
+    data:
+      entity_id: media_player.ytube_music_player
+      filter: playlists
+      query: '{{ states(''input_text.yt_music_search_query'') }}'
+
+heating_blanket_limit_duration:
+  alias: Limitation allumage plaid chauffant
+  sequence:
+    - service: switch.turn_on
+      data:
+        entity_id: switch.heating_blanket_on_off
+    - service: timer.start    
+      entity_id: timer.heating_blanket
+      data_template:
+        duration: >
+          {% if states.sensor.temperature_bedroom.state | int < 16 %}
+            01:00:00
+          {% elif states.sensor.temperature_bedroom.state | int < 17 %}
+            00:45:00
+          {% elif states.sensor.temperature_bedroom.state | int < 18 %}
+            00:30:00
+          {% elif states.sensor.temperature_bedroom.state | int < 19 %}
+            00:25:00
+          {% elif states.sensor.temperature_bedroom.state | int < 20 %}
+            00:20:00
+          {% else %}
+            00:15:00
+          {% endif %}
+    - wait_template: "{{ states.timer.heating_blanket.state == 'idle' }}"
+    - service: switch.turn_off
+      data:
+        entity_id: switch.heating_blanket_on_off
