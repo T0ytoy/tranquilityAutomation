@@ -13,9 +13,10 @@ homeassistant:
   # Customization file
   customize: !include customize.yaml
   allowlist_external_dirs:
-    - /config/Recordings
-    - /config/ssl
+#    - /config/ssl
     - /config/sh
+  media_dirs:
+    media: "/media"
 
 # Configure a default setup of Home Assistant (frontend, api, etc)
 default_config:
@@ -25,10 +26,10 @@ default_config:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 http:
-  ssl_certificate: /etc/letsencrypt/live/tranquility-base.eu/fullchain.pem
-  ssl_key: /etc/letsencrypt/live/tranquility-base.eu/privkey.pem
+#  ssl_certificate: /etc/letsencrypt/live/tranquility-base.eu/fullchain.pem
+#  ssl_key: /etc/letsencrypt/live/tranquility-base.eu/privkey.pem
   use_x_forwarded_for: true
-  trusted_proxies: 
+  trusted_proxies:
    - 127.0.0.1
    - 192.168.0.101
 
@@ -44,13 +45,112 @@ recorder:
   # db_url: postgresql://hass:mvtmjsun42@127.0.0.1/hass
   db_url: postgresql://hass:mvtmjsun42@192.168.0.101:5433/hass
   commit_interval: 5
+  purge_keep_days: 31
+  exclude:
+    entities:
+      - sensor.monthly_total_download_bbox
+      - sensor.monthly_total_upload_bbox
+      - sensor.download_bbox
+      - sensor.upload_bbox
+      - sensor.processor_use_percent
+      - sensor.memory_use_percent
+      - sensor.glances_cpu_used
+      - sensor.glances_ram_used_percent
+      - sensor.upload_powerhouse
+      - sensor.download_powerhouse
 
 xiaomi_aqara:
   discovery_retry: 15
   gateways:
     - key: !secret gatewayKey
 
-#zha_map:
+switch:
+  - platform: template
+    switches:
+      desk_heater:
+        value_template: "{{ is_state('switch.sonoff_desk_heater', 'off') }}"
+        turn_on:
+          service: switch.turn_off
+          data:
+            entity_id: switch.sonoff_desk_heater
+        turn_off:
+          service: switch.turn_on
+          data:
+            entity_id: switch.sonoff_desk_heater
+      livingroom_heater:
+        value_template: "{{ is_state('switch.sonoff_livingroom_heater', 'off') }}"
+        turn_on:
+          service: switch.turn_off
+          data:
+            entity_id: switch.sonoff_livingroom_heater
+        turn_off:
+          service: switch.turn_on
+          data:
+            entity_id: switch.sonoff_livingroom_heater
+      bedroom_heater:
+        value_template: "{{ is_state('switch.sonoff_bedroom_heater', 'off') }}"
+        turn_on:
+          service: switch.turn_off
+          data:
+            entity_id: switch.sonoff_bedroom_heater
+        turn_off:
+          service: switch.turn_on
+          data:
+            entity_id: switch.sonoff_bedroom_heater
+
+climate:
+# - platform: generic_thermostat
+  - platform: simple_thermostat
+    name: desk
+    heater: switch.desk_heater
+    target_sensor: sensor.temperature_desk
+    min_temp: 15
+    max_temp: 22
+    ac_mode: false
+    # target_temp: 18
+    cold_tolerance: 0.2
+    hot_tolerance: 0.2
+    min_cycle_duration:
+      minutes: 5
+    keep_alive:
+      minutes: 60
+    initial_hvac_mode: "heat"
+    # away_temp: 16
+    precision: 0.1
+  - platform: simple_thermostat
+    name: livingroom
+    heater: switch.livingroom_heater
+    target_sensor: sensor.temperature_livingroom
+    min_temp: 15
+    max_temp: 22
+    ac_mode: false
+    # target_temp: 18
+    cold_tolerance: 0.2
+    hot_tolerance: 0.2
+    min_cycle_duration:
+      minutes: 5
+    keep_alive:
+      minutes: 60
+    initial_hvac_mode: "heat"
+    # away_temp: 16
+    precision: 0.1
+  - platform: simple_thermostat
+    name: bedroom
+    heater: switch.bedroom_heater
+    target_sensor: sensor.temperature_bedroom
+    min_temp: 15
+    max_temp: 22
+    ac_mode: false
+    # target_temp: 18
+    cold_tolerance: 0.2
+    hot_tolerance: 0.2
+    min_cycle_duration:
+      minutes: 5
+    keep_alive:
+      minutes: 60
+    initial_hvac_mode: "heat"
+    # away_temp: 16
+    precision: 0.1
 
 yeelight:
   devices:
@@ -85,14 +185,21 @@ light:
       - light.LampeChevet
   - platform: group
     name: Lumière Miroir Salle de Bain
-    entities: 
+    entities:
       - light.bathroom_bulb_1_cwww
       - light.bathroom_bulb_2_cwww
   - platform: group
     name: Lumière Miroir Salle de Bain RGB
-    entities: 
+    entities:
       - light.bathroom_bulb_1_rgb
       - light.bathroom_bulb_2_rgb
+
+powercalc:
+  scan_interval: 00:01:00 #Each minute
+  create_energy_sensors: true
+  power_sensor_naming: "{}_power_usage"
+  create_utility_meters: true
+  energy_sensor_naming: "{}_energy_spent"
 
 sensor:
   # - platform: file
@@ -148,7 +255,17 @@ sensor:
     source: sensor.battery_level_antoine
     round: 1
     unit: "%/h"
-    time_window: "00:15:00"
+    time_window: 00:15:00
+  - platform: derivative
+    source: sensor.battery_level_anh
+    round: 1
+    time_window: 60
+    unit: "%/h"
+    time_window: 00:15:00
+  - platform: derivative
+    source: sensor.lixee_zlinky_tic_energy_spent
+    round: 3
+    unit: "kW"
   - platform: template
     sensors:
       battery_derivative_positive_antoine:
@@ -174,11 +291,14 @@ sensor:
         unit_of_measurement: '°C'
         value_template: >
           {{ state_attr('weather.nantes', 'temperature') }}
-  - platform: derivative
-    source: sensor.battery_level_anh
-    round: 1
-    unit: "%/h"
-    time_window: "00:15:00"
+      heaters_energy_spent:
+        friendly_name: Energie chauffages
+        unit_of_measurement: kWh
+        value_template: >
+          {{ [states('sensor.livingroom_heater_energy_spent') | float,
+            states('sensor.desk_heater_energy_spent') | float,
+            states('sensor.bedroom_heater_energy_spent') | float]
+            | sum }}
   - platform: template
     sensors:
       battery_derivative_positive_anh:
@@ -199,6 +319,11 @@ sensor:
           {% else %}
             0
           {% endif %}
+      linky_power_usage_watts:
+        friendly_name: "Puissance électrique"
+        unit_of_measurement: 'W'
+        value_template: >
+          {{ states('sensor.sensor_lixee_zlinky_tic_energy_spent_derivative') | float*1000 }}
   - platform: statistics
     name: battery_derivative_negative_antoine_statistics
     entity_id: sensor.battery_derivative_negative_antoine
@@ -212,7 +337,7 @@ sensor:
       Accept-Encoding: ''
     value_template: 'interface: enp1s0'
     json_attributes_path: "$.enp1s0.[0]"
-    json_attributes: 
+    json_attributes:
       - tx
       - rx
     scan_interval: 45
@@ -223,7 +348,7 @@ sensor:
       Accept-Encoding: ''
     value_template: 'interface: bbox'
     json_attributes_path: "$.[0].wan.ip.stats.rx"
-    json_attributes: 
+    json_attributes:
       - occupation
       - bytes
     scan_interval: 12
@@ -234,27 +359,10 @@ sensor:
       Accept-Encoding: ''
     value_template: 'interface: bbox'
     json_attributes_path: "$.[0].wan.ip.stats.tx"
-    json_attributes: 
+    json_attributes:
       - occupation
       - bytes
     scan_interval: 12
-  # - platform: rest
-  #   resource: https://mabbox.bytel.fr/api/v1/wan/ip/stats
-  #   sensor: 
-  #     - name: bbox_network_rx
-  #       value_template: 'bbox network'    
-  #       json_attributes_path: "$.[0].wan.ip.stats.rx"
-  #       json_attributes: 
-  #         - occupation
-  #         - bytes
-  #       scan_interval: 12
-  #     - name: bbox_network_tx
-  #       value_template: 'bbox network'    
-  #       json_attributes_path: "$.[0].wan.ip.stats.tx"
-  #       json_attributes: 
-  #         - occupation
-  #         - bytes
-  #       scan_interval: 12
   - platform: template
     sensors:
       download_powerhouse:
@@ -287,20 +395,121 @@ sensor:
       total_upload_bbox:
         value_template: '{{ states.sensor.bbox_network_tx.attributes["bytes"] | multiply(0.000001) | round(2) }}'
         unit_of_measurement: Mo
+  - platform: filter
+    name: "filtered monthly bbox download"
+    entity_id: sensor.monthly_total_download_bbox
+    filters:
+      - filter: time_throttle
+        window_size: "00:05:00"
+  - platform: filter
+    name: "filtered monthly bbox upload"
+    entity_id: sensor.monthly_total_upload_bbox
+    filters:
+      - filter: time_throttle
+        window_size: "00:05:00"
+  - platform: filter
+    name: "filtered bbox download"
+    entity_id: sensor.download_bbox
+    filters:
+      - filter: time_throttle
+        window_size: "00:00:15"
+  - platform: filter
+    name: "filtered bbox upload"
+    entity_id: sensor.upload_bbox
+    filters:
+      - filter: time_throttle
+        window_size: "00:00:15"
+  - platform: filter
+    name: "filtered rpi processor use percent"
+    entity_id: sensor.processor_use_percent
+    filters:
+      - filter: time_throttle
+        window_size: "00:01:00"
+  - platform: filter
+    name: "filtered rpi memory use percent"
+    entity_id: sensor.memory_use_percent
+    filters:
+      - filter: time_throttle
+        window_size: "00:01:00"
+  - platform: filter
+    name: "filtered powerhouse processor use percent"
+    entity_id: sensor.glances_cpu_used
+    filters:
+      - filter: time_throttle
+        window_size: "00:01:00"
+  - platform: filter
+    name: "filtered powerhouse memory use percent"
+    entity_id: sensor.glances_ram_used_percent
+    filters:
+      - filter: time_throttle
+        window_size: "00:00:15"
+  - platform: filter
+    name: "filtered powerhouse upload"
+    entity_id: sensor.upload_powerhouse
+    filters:
+      - filter: time_throttle
+        window_size: "00:00:15"
+  - platform: filter
+    name: "filtered powerhouse download"
+    entity_id: sensor.download_powerhouse
+    filters:
+      - filter: time_throttle
+        window_size: "00:01:00"
   - platform: history_stats
     name: time_on_smartphone_screen_antoine
     entity_id: input_boolean.smartphone_screen_antoine
     state: "on"
     type: time
-    start: "{{ now().replace(hour=4, minute=0, second=0) }}"
+    start: >
+      {% if now().hour | int >= 4 %}
+        {{ now().replace(hour=4, minute=0, second=0) }}
+      {% else %}
+        {{ now().replace(day=now().day-1, hour=4, minute=0, second=0) }}
+      {% endif %}
     end: "{{ now() }}"
   - platform: history_stats
     name: time_on_smartphone_screen_anh
     entity_id: input_boolean.smartphone_screen_anh
     state: "on"
     type: time
-    start: "{{ now().replace(hour=4, minute=0, second=0) }}"
-    end: "{{ now() }}"      
+    start: >
+      {% if now().hour | int >= 4 %}
+        {{ now().replace(hour=4, minute=0, second=0) }}
+      {% else %}
+        {{ now().replace(day=now().day-1, hour=4, minute=0, second=0) }}
+      {% endif %}
+    end: "{{ now() }}"
+  - platform: history_stats
+    name: time_at_home
+    entity_id: group.admin_devices
+    state: "home"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+  - platform: powercalc
+    entity_id: switch.desk_heater
+    fixed:
+      power: 720
+  - platform: powercalc
+    entity_id: switch.livingroom_heater
+    fixed:
+      power: 900
+  - platform: powercalc
+    entity_id: switch.bedroom_heater
+    fixed:
+      power: 950
+
+
+template:
+  - sensor:
+  # sensor qui retire la consommation de tous les appareils suivis (prises connectées, chauffages...) à la consommation totale du linky
+  # afin d'avoir un suivi du reste de la consommation uniquement
+    - name: monthly_linky_filtered_for_tracked_devices_energy_spent
+      state: >
+        {{ states('sensor.monthly_linky_energy_spent') | float - states.sensor | selectattr('attributes.meter_period', 'eq', 'monthly') | selectattr('attributes.device_class', 'eq', 'energy') | selectattr('entity_id', 'ne', 'sensor.monthly_linky_energy_spent') | selectattr('entity_id', 'ne', 'sensor.monthly_heaters_energy_spent') | map(attribute='state') | map('float') | sum }}
+      unit_of_measurement: kWh
+      device_class: energy
+      state_class: total_increasing
 
 utility_meter:
   monthly_tv_power_usage:
@@ -315,12 +524,27 @@ utility_meter:
   monthly_heating_blanket_power_usage:
     source: sensor.heating_blanket_energy_spent
     cycle: monthly
+  monthly_fan_power_usage:
+    source: sensor.fan_power_usage
+    cycle: monthly
   monthly_total_download_bbox:
     source: sensor.total_download_bbox
     cycle: monthly
   monthly_total_upload_bbox:
     source: sensor.total_upload_bbox
     cycle: monthly
+  monthly_heaters_energy_spent:
+    source: sensor.heaters_energy_spent
+    cycle: monthly
+  daily_heaters_energy_spent:
+    source: sensor.heaters_energy_spent
+    cycle: daily
+  monthly_linky_energy_spent:
+    source: sensor.lixee_zlinky_tic_energy_spent
+    cycle: monthly
+  daily_linky_energy_spent:
+    source: sensor.lixee_zlinky_tic_energy_spent
+    cycle: daily
 
 input_datetime:
   morning_routine_date_time:
@@ -336,7 +560,6 @@ input_number:
   battery_charging_percentage_limit_antoine:
     name: Limite charge smartphone Antoine
     unit_of_measurement: "%"
-    initial: 80
     min: 0
     max: 100
     step: 1
@@ -344,7 +567,6 @@ input_number:
   battery_charging_percentage_limit_anh:
     name: Limite charge smartphone Anh
     unit_of_measurement: "%"
-    initial: 80
     min: 0
     max: 100
     step: 1
@@ -352,7 +574,6 @@ input_number:
   speakers_turnoff_timer:
     name: Délai extinction enceintes
     unit_of_measurement: "minutes"
-    initial: 60
     min: 0
     max: 240
     step: 5
@@ -360,7 +581,6 @@ input_number:
   speakers_target_volume:
     name: Vol. cible
     unit_of_measurement: "%"
-    initial: 3
     min: 0
     max: 100
     step: 1
@@ -368,7 +588,6 @@ input_number:
   speakers_volume_change_duration:
     name: Durée transition
     unit_of_measurement: "minutes"
-    initial: 5
     min: 0
     max: 120
     step: 1
@@ -376,37 +595,17 @@ input_number:
 # hidden
   speakers_start_volume:
     name: Volume initial des enceintes
-    initial: 20
     min: 0
     max: 100
     step: 1
     mode: box
-    
+
 timer:
   m365_charge_timer:
     name: temps de charge restant
     duration: '01:10:00'
 
 wake_on_lan:
-
-webostv:
-  host: 192.168.0.20
-  name: LG_OLED55B7
-  turn_on_action:
-    service: wake_on_lan.send_magic_packet
-    data:
-      mac: "20:3D:BD:01:7B:0A"
-
-# media_player:
-  # - platform: webostv
-    # name: LG_OLED55B7
-    # host: 192.168.0.26
-    # timeout: 4
-    # turn_on_action:
-      # service: wake_on_lan.send_magic_packet
-      # data:
-        # mac: "20:3D:BD:01:7B:0A"
-  # - platform: plex
 
 notify:
   - platform: webostv
@@ -438,16 +637,6 @@ notify:
     # group.all_automations:
       # expose: false
 
-
-device_tracker:
-  - platform: nmap_tracker
-    hosts: 192.168.0.254/24
-    home_interval: 15
-#    consider_home: 0:03:00
-    scan_options: "-F –host-timeout 15s"
-    exclude:
-      - 192.168.0.44
-
 ffmpeg:
   ffmpeg_bin: /usr/bin/ffmpeg
 
@@ -463,3 +652,14 @@ binary_sensor:
     input: !secret cameraStream
     changes: 14
     extra_arguments: -vf scale=640:480
+
+zha:
+  device_config:
+    00:12:4b:00:24:c0:9c:ee-1:    # format: {ieee}-{endpoint_id}
+      type: 'switch'              # corrected device type
+    00:12:4b:00:24:c0:1d:95-1:
+      type: 'switch'
+    00:12:4b:00:24:c2:09:97-1:
+      type: 'switch'
+
+zha_toolkit:

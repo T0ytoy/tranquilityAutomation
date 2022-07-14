@@ -386,7 +386,7 @@ record_camera:
     data:
       entity_id: camera.ffmpeg
       duration: 60
-      filename: './Recordings/camera_{{ now().strftime("%Y%m%d-%H%M%S") }}.mp4'
+      filename: '/media/Recordings/camera_{{ now().strftime("%Y%m%d-%H%M%S") }}.mp4'
       
 m365_limit_charge:
   alias: Limitation charge m365
@@ -419,7 +419,7 @@ m365_limit_charge:
               00:00:01
             {% endif %}
           {% endif %}
-    - wait_template: "{{ states.timer.m365_charge_timer.state == 'idle' }}"
+    - wait_template: "{{ states.timer.m365_charge_timer.state == 'idle' or states('switch.m365_plug') == 'off' }}"
     - service: switch.turn_off
       data:
         entity_id: switch.m365_plug

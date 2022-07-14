@@ -38,10 +38,13 @@ sensor.m365_power_usage:
   unit_of_measurement: W
 sensor.monthly_m365_power_usage:
   unit_of_measurement: kWh
+  friendly_name: M365
 sensor.monthly_multimedia_power_usage:
   unit_of_measurement: kWh
+  friendly_name: Multimedia
 sensor.monthly_tv_power_usage:
   unit_of_measurement: kWh
+  friendly_name: TV
 script.m365_limit_charge:
   icon: mdi:scooter
 sensor.m365_power:
@@ -54,3 +57,35 @@ media_player.ytube_music_player:
 script.heating_blanket_limit_duration:
   friendly_name: Allumer plaid chauffant
   icon: hass:radiator
+light.sonoff_chauffage_bureau_on_off:
+  domain: switch
+sensor.desk_heater_power_usage:
+  friendly_name: Chauffage bureau
+sensor.desk_heater_energy_spent_monthly:
+  friendly_name: Chauffage bureau
+  unit_of_measurement: kWh
+sensor.monthly_heating_blanket_power_usage:
+  friendly_name: Plaid chauffant
+sensor.monthly_total_download_bbox:
+  friendly_name: Download
+sensor.monthly_total_upload_bbox:
+  friendly_name: Upload
+sensor.download_powerhouse:
+  state_class: measurement
+sensor.upload_powerhouse:
+  state_class: measurement
+sensor.bedroom_heater_energy_spent_monthly:
+  friendly_name: Chauffage chambre
+sensor.livingroom_heater_energy_spent_monthly:
+  friendly_name: Chauffage salon
+sensor.livingroom_heater_energy_spent_daily:
+  friendly_name: Chauffage salon
+sensor.bedroom_heater_energy_spent_daily:
+  friendly_name: Chauffage chambre
+sensor.bedroom_heater_power_usage:
+  friendly_name: Chauffage chambre
+  icon: mdi:bed
+sensor.daily_heaters_energy_spent:
+  friendly_name: Chauffage appartement
+sensor.monthly_linky_filtered_for_tracked_devices_energy_spent:
+  friendly_name: Autre

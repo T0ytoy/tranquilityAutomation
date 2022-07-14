@@ -19,3 +19,9 @@
       - automation.volume_musique_chambre_diminue_si_lumiere_eteinte
       - input_number.speakers_target_volume
       - input_number.speakers_volume_change_duration
+
+  livigroom_heaters:
+    name: chauffages salon
+    entities:
+      - climate.livingroom
+      - climate.desk
