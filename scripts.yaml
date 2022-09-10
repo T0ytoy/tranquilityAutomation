@@ -215,7 +215,7 @@ turn_on_bathroom:
       brightness: 70
       kelvin: >
         {% if now().hour >= 22 or now().hour < 9 %}
-          3000
+          2000
         {% else %}
           4500
         {% endif %}
@@ -246,7 +246,12 @@ turn_on_bathroom_weak:
         {% else %}
           70
         {% endif %}
-      kelvin: 4000
+      kelvin: >
+        {% if now().hour >= 22 or now().hour < 9 %}
+          2000
+        {% else %}
+          4500
+        {% endif %}
 turn_on_bathroom_strong:
   alias: Allumer salle de bain (fort)
   sequence:
@@ -263,10 +268,10 @@ turn_on_bathroom_strong:
   - service: light.turn_on
     entity_id: light.lumiere_miroir_salle_de_bain
     data_template:
-      brightness: 200
+      brightness: 255
       kelvin: >
         {% if now().hour >= 22 or now().hour < 9 %}
-          3500 
+          2500 
         {% else %}
           6000
         {% endif %}
